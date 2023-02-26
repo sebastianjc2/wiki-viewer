@@ -10,7 +10,7 @@ def make_endpoints(app):
     def home():
         # TODO(Checkpoint Requirement 2 of 3): Change this to use render_template
         # to render main.html on the home page.
-        return render_template("main.html")
+        return render_template("home.html")
 
     @app.route("/pages")
     def pages():
@@ -29,3 +29,17 @@ def make_endpoints(app):
         return render_template("main.html")
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
+    @app.route("/login", methods=["POST", "GET"])
+    def login():
+        return "Login"
+    
+    @app.route("/signup", methods=["POST", "GET"])
+    def sign_up():
+        return "Sign Up"
+
+    @app.route("/logout", methods=["POST", "GET"])
+    def log_out():
+        return "Log Out"
+
+    
+    
