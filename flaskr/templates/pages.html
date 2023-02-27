@@ -1,30 +1,28 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% block title %}Team Bard's Wiki Viewer{% endblock %}
 
-<head>
-    <head>
-        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
-        <title>pages</title>
-    </head>
-</head>
+{% block routes %}
+<li class="nav-item">
+    <a class="nav-link" href="/login">Login</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/signup">Sign Up</a>
+</li>
+{% endblock %}
 
-<body>
-    <!-- TODO(Project 1): Implement routes. -->
-    <div>       
-        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
-         <h2> <b>Pages contained in this Wiki</b> </h2>
-            <ul>
-                <li>
-                    <a href="{{ url_for('redHotChiliPeppers') }}">Red Hot Chili Peppers</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('nirvana') }}">Nirvana</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('deftones') }}">Deftones</a>
-                </li>
-            </ul> 
-    </div>
-</body>
-
-</html>
+{% block content %}
+<div>       
+    <h2> <b>Pages contained in this Wiki</b> </h2>
+       <ul>
+           <li>
+               <a href="{{ url_for('redHotChiliPeppers') }}">Red Hot Chili Peppers</a>
+           </li>
+           <li>
+               <a href="{{ url_for('nirvana') }}">Nirvana</a>
+           </li>
+           <li>
+               <a href="{{ url_for('deftones') }}">Deftones</a>
+           </li>
+       </ul> 
+</div>
+{% endblock %}
