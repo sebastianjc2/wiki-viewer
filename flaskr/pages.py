@@ -16,17 +16,11 @@ def make_endpoints(app):
     def pages():
         return render_template("pages.html")
 
-    @app.route("/pages/redHotChiliPeppers")
-    def redHotChiliPeppers():
-        return render_template("main.html")
-
-    @app.route("/pages/nirvana")
-    def nirvana():
-        return render_template("main.html")
-    
-    @app.route("/pages/deftones")
-    def deftones():
-        return render_template("main.html")
+    @app.route("/pages/<pageName>")
+    def page(pageName):
+        # content = backend.get_wiki_page(pageName)
+        # TODO: pass content=content once the backend class is up
+        return render_template("main.html", content=content)
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/login", methods=["POST", "GET"])
