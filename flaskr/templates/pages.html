@@ -14,16 +14,11 @@
 <div>       
     <h2> <b>Pages contained in this Wiki</b> </h2>
        <ul>
-           <!-- TODO: fix this -->
+           <!-- TODO: Implement some way to have every single url put on this page -->
            <li>
-               <a href="{{ url_for('redHotChiliPeppers') }}">Red Hot Chili Peppers</a>
+               <a href="{{ url_for('page', pageName = pageName) }}">pageName</a>
            </li>
-           <li>
-               <a href="{{ url_for('nirvana') }}">Nirvana</a>
-           </li>
-           <li>
-               <a href="{{ url_for('deftones') }}">Deftones</a>
-           </li>
+           <!-- TODO: Backend needs to pass in pageName -->
        </ul> 
 </div>
 {% endblock %}
