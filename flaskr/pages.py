@@ -20,7 +20,7 @@ def make_endpoints(app):
     def page(pageName):
         # content = backend.get_wiki_page(pageName)
         # TODO: pass content=content once the backend class is up
-        return render_template("page_Content.html", content=content)
+        return render_template("page_Content.html", content = content)
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/login", methods=["POST", "GET"])

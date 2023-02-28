@@ -11,19 +11,27 @@
 {% endblock %}
 
 {% block content %}
-<div>       
-    <h2> <b>Pages contained in this Wiki</b> </h2>
-       <ul>
-           <!-- TODO: fix this -->
-           <li>
-               <a href="{{ url_for('redHotChiliPeppers') }}">Red Hot Chili Peppers</a>
-           </li>
-           <li>
-               <a href="{{ url_for('nirvana') }}">Nirvana</a>
-           </li>
-           <li>
-               <a href="{{ url_for('deftones') }}">Deftones</a>
-           </li>
-       </ul> 
-</div>
+<!--<!DOCTYPE html>
+<html> -->
+<head>
+    <head>
+        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
+        <title>pages</title>
+    </head>
+</head>
+
+<body>
+    <!-- TODO(Project 1): Implement routes. -->
+    <div>       
+        <!-- TODO: implement something that puts every single url onto the Pages page.-->
+         <h1> Pages contained in this Wiki </h1>
+            <ul>
+                <li>
+                    <a href="{{ url_for('page', pageName = pageName) }}">pageName</a>
+                    <!-- TODO: Establish how backend is going to work to provide pageName-->
+                </li>
+            </ul> 
+    </div>
+</body>
+
 {% endblock %}

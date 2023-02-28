@@ -34,7 +34,7 @@ def create_app(test_config=None):
     # and additional endpoints.
     pages.make_endpoints(app)
     
-    db.init_app(app)
+    #db.init_app(app)
 
 
     return app
