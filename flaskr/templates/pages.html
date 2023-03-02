@@ -26,10 +26,15 @@
         <!-- TODO: implement something that puts every single url onto the Pages page.-->
          <h1> Pages contained in this Wiki </h1>
             <ul>
+                {% for pageName in backend.get_all_page_names() %}
+                <!-- for this for loop approach to work, backend.get_all_page_names() needs to
+                be an iterable or a list so that it can make a url for each page-->
                 <li>
                     <a href="{{ url_for('page', pageName = pageName) }}">pageName</a>
-                    <!-- TODO: Establish how backend is going to work to provide pageName-->
+                    
                 </li>
+                <!-- there is a possibility that we should be using backend.get_wiki_page() to do this instead-->
+                {% endfor %} 
             </ul> 
     </div>
 </body>
