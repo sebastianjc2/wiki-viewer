@@ -9,7 +9,12 @@ from flaskr.user import User
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=25)])
-    submit = SubmitField("Submit")
+    submit = SubmitField(label="Login")
+
+class SignupForm(FlaskForm):
+    username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
+    password = PasswordField(validators=[InputRequired(), Length(min=8, max=25)])
+    submit = SubmitField(label="Sign Up")
 
 def make_endpoints(app, backend):
     # Flask uses the "app.route" decorator to call methods when users
@@ -47,7 +52,15 @@ def make_endpoints(app, backend):
     
     @app.route("/signup", methods=["POST", "GET"])
     def sign_up():
-        return "Sign Up"
+        form = SignupForm()
+        if form.validate_on_submit():
+            # do backend stuff
+            # check if backend stuff went well
+            # if it did, then:
+            user = User(form.username.data)
+            login_user(user, remember=True)
+            return redirect(url_for('home'))
+        return render_template("signup.html", form=form, user=current_user)
 
 
     @app.route("/logout", methods=["POST", "GET"])
