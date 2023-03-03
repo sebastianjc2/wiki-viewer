@@ -3,6 +3,7 @@ from flaskr import pages
 from flask_login import LoginManager
 from wtforms.validators import InputRequired, Length, ValidationError
 from flaskr.user import User
+from flaskr.backend import Backend
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -29,6 +30,7 @@ def create_app(test_config=None):
         # Load the test config if passed in.
         app.config.from_mapping(test_config)
 
+    backend = Backend()
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
     login_manager = LoginManager()
@@ -38,7 +40,6 @@ def create_app(test_config=None):
     def load_user(user_id):
         return User(user_id)
 
-    pages.make_endpoints(app)
-
+    pages.make_endpoints(app,backend)
 
     return app
