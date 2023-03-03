@@ -28,8 +28,7 @@ def make_endpoints(app, backend):
 
     @app.route("/pages/<pageName>")
     def page(pageName):
-        # content = backend.get_wiki_page(pageName)
-        # TODO: pass content=content once the backend class is up
+        content = backend.get_wiki_page(pageName)
         return render_template("page_Content.html", content = content, user=current_user)
 
 
