@@ -1,16 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Team Bard's Wiki Viewer{% endblock %}
 
-{% block routes %}
-<li class="nav-item">
-    <a class="nav-link" href="/login">Login</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="/signup">Sign Up</a>
-</li>
-{% endblock %}
 
 {% block content %}
     <h1>Welcome to the Wiki!</h1>
     <p>  {{wiki_page}} </p> 
+    {% if user.is_authenticated %}
+    <p> Hi, {{user.get_id()}}! </p>
+    {% endif %}
 {% endblock %}

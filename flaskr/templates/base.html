@@ -29,7 +29,27 @@
               <li class="nav-item">
                 <a class="nav-link" href="/about">About</a>
               </li>
-              {% block routes %}{% endblock %}
+              {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="/upload">Upload</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link"> | </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link">{{user.get_id()}}</a>
+              </li>
+              {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/signup">Sign Up</a>
+              </li>
+              {% endif %}
             </ul>
           </div>
         </div>
