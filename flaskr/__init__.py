@@ -1,6 +1,8 @@
-from flaskr import pages
-
 from flask import Flask
+from flaskr import pages
+from flask_login import LoginManager
+from wtforms.validators import InputRequired, Length, ValidationError
+from flaskr.user import User
 from flaskr.backend import Backend
 
 import logging
@@ -13,10 +15,11 @@ def create_app(test_config=None):
     # Create and configure the app.
     app = Flask(__name__, instance_relative_config=True)
 
-    # This is the default secret key used for login sessions
+    
     # By default the dev environment uses the key 'dev'
+    # Generated random key with secrets.token_hex()
     app.config.from_mapping(
-        SECRET_KEY='dev'
+        SECRET_KEY='5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
     )
 
     if test_config is None:
@@ -30,7 +33,13 @@ def create_app(test_config=None):
     backend = Backend()
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
-    pages.make_endpoints(app,backend)
+    login_manager = LoginManager()
+    login_manager.init_app(app)
 
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User(user_id)
+
+    pages.make_endpoints(app,backend)
 
     return app

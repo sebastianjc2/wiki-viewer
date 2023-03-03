@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block routes %}
+<li class="nav-item">
+    <a class="nav-link" href="/login">Login</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="/signup">Sign Up</a>
+</li>
+{% endblock %}
+
+{% block content %}
+    <h1>Login</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.username }}
+        {{ form.password }}
+        {{ form.submit }}
+    </form>
+{% endblock %}
