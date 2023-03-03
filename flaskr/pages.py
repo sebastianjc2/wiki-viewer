@@ -19,17 +19,18 @@ def make_endpoints(app, backend):
         # TODO(Checkpoint Requirement 2 of 3): Change this to use render_template
         # to render main.html on the home page.
         wiki_page = backend.get_wiki_page("test.txt")
-        return render_template("home.html", wiki_page = wiki_page)
+        return render_template("home.html", wiki_page = wiki_page, user=current_user)
 
     @app.route("/pages")
     def pages():
-        return render_template("pages.html")
+        return render_template("pages.html", user=current_user)
 
     @app.route("/pages/<pageName>")
     def page(pageName):
         # content = backend.get_wiki_page(pageName)
         # TODO: pass content=content once the backend class is up
-        return render_template("page_Content.html", content = content)
+        return render_template("page_Content.html", content = content, user=current_user)
+
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     @app.route("/login", methods=["POST", "GET"])
@@ -40,18 +41,19 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if backend stuff went well, then
             user = User(form.username.data)
-            print(form.username.data)
             login_user(user, remember=True)
             return redirect(url_for('home'))
-        return render_template("login.html", form=form)
+        return render_template("login.html", form=form, user=current_user)
     
     @app.route("/signup", methods=["POST", "GET"])
     def sign_up():
         return "Sign Up"
 
+
     @app.route("/logout", methods=["POST", "GET"])
     def log_out():
-        return "Log Out"
+        logout_user()
+        return redirect(url_for('home'))
 
     
     
