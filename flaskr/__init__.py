@@ -1,12 +1,10 @@
 from flaskr import pages
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flaskr.backend import Backend
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-
-db = SQLAlchemy
 
 # The flask terminal command inside "run-flask.sh" searches for
 # this method inside of __init__.py (containing flaskr module 
@@ -18,8 +16,7 @@ def create_app(test_config=None):
     # This is the default secret key used for login sessions
     # By default the dev environment uses the key 'dev'
     app.config.from_mapping(
-        SECRET_KEY='dev',
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///db.sqlite'
+        SECRET_KEY='dev'
     )
 
     if test_config is None:
@@ -30,11 +27,10 @@ def create_app(test_config=None):
         # Load the test config if passed in.
         app.config.from_mapping(test_config)
 
+    backend = Backend()
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
-    pages.make_endpoints(app)
-    
-    #db.init_app(app)
+    pages.make_endpoints(app,backend)
 
 
     return app

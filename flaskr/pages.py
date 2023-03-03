@@ -2,7 +2,7 @@ from flask import render_template
 from flask import Flask
 
 
-def make_endpoints(app):
+def make_endpoints(app, backend):
 
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
@@ -10,7 +10,8 @@ def make_endpoints(app):
     def home():
         # TODO(Checkpoint Requirement 2 of 3): Change this to use render_template
         # to render main.html on the home page.
-        return render_template("home.html")
+        wiki_page = backend.get_wiki_page("test.txt")
+        return render_template("home.html", wiki_page = wiki_page)
 
     @app.route("/pages")
     def pages():
