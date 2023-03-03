@@ -26,6 +26,10 @@ def make_endpoints(app, backend):
         wiki_page = backend.get_wiki_page("test.txt")
         return render_template("home.html", wiki_page = wiki_page, user=current_user)
 
+    @app.route("/about")
+    def about():
+        return render_template("about.html", user=current_user)
+
     @app.route("/pages")
     def pages():
         return render_template("pages.html", user=current_user)

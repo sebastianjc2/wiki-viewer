@@ -3,9 +3,10 @@
 
 
 {% block content %}
-    <h1>Welcome to the Wiki!</h1>
-    <p>  {{wiki_page}} </p> 
     {% if user.is_authenticated %}
-    <p> Hi, {{user.get_id()}}! </p>
+    <h3> Welcome to the Wiki, {{user.get_id()}}! </h3>
+    {% else %}
+    <h3>Welcome to the Wiki!</h3>
     {% endif %}
+    <p>  {{wiki_page}} </p> 
 {% endblock %}
