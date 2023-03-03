@@ -23,12 +23,12 @@ def make_endpoints(app, backend):
 
     @app.route("/pages")
     def pages():
-        return render_template("pages.html", user=current_user)
+        pages = backend.get_all_page_names()
+        return render_template("pages.html", pages = pages, user=current_user)
 
     @app.route("/pages/<pageName>")
     def page(pageName):
-        # content = backend.get_wiki_page(pageName)
-        # TODO: pass content=content once the backend class is up
+        content = backend.get_wiki_page(pageName)
         return render_template("page_Content.html", content = content, user=current_user)
 
 

@@ -13,9 +13,8 @@ class Backend:
         with blob.open("r") as f:
             return f.read()
 
-
-    def get_all_page_names(self, bucketName):
-        blobs = self.storage_client.list_blobs(bucketName)
+    def get_all_page_names(self):
+        blobs = self.storage_client.list_blobs("wiki-content")
         return blobs
 
     def upload(self):
