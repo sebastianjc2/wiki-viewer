@@ -1,10 +1,12 @@
-from flask import render_template, redirect, flash, url_for
+from flask import render_template, redirect, flash, url_for, request
 from flask import Flask
 from flask_login import login_user, login_required, current_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flaskr.user import User
+from werkzeug.utils import secure_filename
+import os
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
@@ -15,6 +17,14 @@ class SignupForm(FlaskForm):
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
     password = PasswordField(validators=[InputRequired(), Length(min=8, max=25)])
     submit = SubmitField(label="Sign Up")
+
+class Upload:
+    UPLOAD_FOLDER = '/path/to/the/uploads'
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+    filename.rsplit('.', 1)[1].lower() in Upload().ALLOWED_EXTENSIONS
 
 def make_endpoints(app, backend):
     # Flask uses the "app.route" decorator to call methods when users
@@ -32,12 +42,12 @@ def make_endpoints(app, backend):
 
     @app.route("/pages")
     def pages():
-        return render_template("pages.html", user=current_user)
+        pages = backend.get_all_page_names()
+        return render_template("pages.html", pages = pages, user=current_user)
 
     @app.route("/pages/<pageName>")
     def page(pageName):
-        # content = backend.get_wiki_page(pageName)
-        # TODO: pass content=content once the backend class is up
+        content = backend.get_wiki_page(pageName)
         return render_template("page_Content.html", content = content, user=current_user)
 
 
@@ -72,5 +82,22 @@ def make_endpoints(app, backend):
         logout_user()
         return redirect(url_for('home'))
 
-    
-    
+    @app.route('/upload', methods=['GET', 'POST'])
+    def upload_file():
+        if request.method == 'POST':
+        # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                #upload = backend.upload(file)
+                return redirect(url_for('download_file', name=filename))                
+        return render_template("upload.html", user=current_user)
