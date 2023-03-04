@@ -1,9 +1,11 @@
-from flask import Flask
+from flask import Flask, flash, request, redirect, url_for
 from flaskr import pages
 from flask_login import LoginManager
 from wtforms.validators import InputRequired, Length, ValidationError
 from flaskr.user import User
 from flaskr.backend import Backend
+from werkzeug.utils import secure_filename
+from flaskr.pages import Upload
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -35,6 +37,8 @@ def create_app(test_config=None):
     # and additional endpoints.
     login_manager = LoginManager()
     login_manager.init_app(app)
+
+    app.config['UPLOAD_FOLDER'] = Upload().UPLOAD_FOLDER
 
     @login_manager.user_loader
     def load_user(user_id):
