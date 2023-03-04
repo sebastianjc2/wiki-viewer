@@ -17,7 +17,7 @@ class Backend:
         blobs = self.storage_client.list_blobs("wiki-content")
         return blobs
 
-    def upload(self):
+    def upload(self, file):
         pass
 
     def sign_up(self):
