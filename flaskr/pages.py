@@ -81,5 +81,6 @@ def make_endpoints(app, backend):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                return redirect(url_for('download_file', name=filename))
+                #upload = backend.upload(file)
+                return redirect(url_for('download_file', name=filename))                
         return render_template("upload.html", user=current_user)
