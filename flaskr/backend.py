@@ -1,5 +1,18 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
+#from flask_sqlalchemy import SQLALchemy
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, FileField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError
+from werkzeug.utils import secure_filename
+import hashlib
+import pages
+import io
+from io import BytesIO
+import pandas 
+
+
+
 
 class Backend:
 
@@ -18,12 +31,52 @@ class Backend:
         return blobs
 
     def upload(self, file):
-        pass
+        #class UploadFileForm(FlaskForm):
+            #file = FileField("File", validators=[InputRequired])
+            #submit = SubmitField("Upload File")
+        #form = UploadFileForm()
+        #if form.validate_on_submit():
+        #file = form.file.data
+        blob = self.wiki_content_bucket.blob(file.filename)
+        blob.upload_from_file(file)
 
-    def sign_up(self):
-        pass
+    def sign_up(self, user, password):
+        secret_key = "amogus"
+        
+        #hashed_password = bcrypt.generate_password_hash(password)
+        #new_user = str(form.username.data) + "," + str(hashed_password)
+        #blob = self.users_passwords_bucket.blob("user_passwords")
+        #with blob.open("a") as f:
+                #f.write(new_user + "\n")
+        #return redirect(url_for('login'))
+        if " " in user or "," in user or "\\" in user or "/" in user:
+            return "Invalid characters in username."
+        blob = self.users_passwords_bucket.blob(user + '.txt')
+        with_salt = f"{user}{secret_key}{password}"
+        password = hashlib.blake2b(with_salt.encode()).hexdigest()
+        if blob.exists(self.storage_client):
+            return "Username is taken."
+        else:
+            with blob.open('w') as f:
+                f.write(password)
+            return "Success"
+        
 
-    def sign_in(self):
+    def sign_in(self, user, password):
+        #form = pages.LoginForm
+        secret_key = "amogus"
+        with_salt = f"{user}{secret_key}{password}"
+        password = hashlib.blake2b(with_salt.encode()).hexdigest()
+
+        blob = self.users_passwords_bucket.blob(user + '.txt')
+        if blob.exists(self.storage_client):
+            with blob.open('r') as f:
+                if f.read() == password:
+                    return "Passed"
+                else:
+                    return "Password fail"
+        else:
+            return "Username Fail"
         pass
 
     def get_image(self):

@@ -60,7 +60,13 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if backend stuff went well, then
             user = User(form.username.data)
-            login_user(user, remember=True)
+            sign_in_status = backend.sign_in(form.username.data, form.password.data)
+            if sign_in_status == "Passed":
+                login_user(user, remember=True)
+            elif sign_in_status == "Password fail":
+                return "Password is incorrect."
+            else:
+                return "That username does not exist."
             return redirect(url_for('home'))
         return render_template("login.html", form=form, user=current_user)
     
@@ -72,7 +78,13 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            login_user(user, remember=True)
+            sign_up_status = backend.sign_up(form.username.data, form.password.data)
+            if sign_up_status == "Success":
+                login_user(user, remember=True)
+            elif sign_up_status == "Username is taken.":
+                return "That username is already taken."
+            else:
+                return "Invalid characters in username."
             return redirect(url_for('home'))
         return render_template("signup.html", form=form, user=current_user)
 
@@ -97,7 +109,8 @@ def make_endpoints(app, backend):
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                #upload = backend.upload(file)
-                return redirect(url_for('download_file', name=filename))                
+                #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                backend.upload(file)
+                #return redirect(url_for('download_file', name=filename))         
+                return redirect(url_for('pages'))       
         return render_template("upload.html", user=current_user)
