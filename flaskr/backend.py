@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, FileField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.utils import secure_filename
 import hashlib
-import pages
+from flaskr.pages import Upload
 import io
 from io import BytesIO
 import pandas 

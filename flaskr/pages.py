@@ -32,9 +32,7 @@ def make_endpoints(app, backend):
     @app.route("/")
     def home():
         # TODO(Checkpoint Requirement 2 of 3): Change this to use render_template
-        # to render main.html on the home page.
-        wiki_page = backend.get_wiki_page("test.txt")
-        return render_template("home.html", wiki_page = wiki_page, user=current_user)
+        return render_template("home.html", user=current_user)
 
     @app.route("/about")
     def about():
@@ -48,7 +46,8 @@ def make_endpoints(app, backend):
     @app.route("/pages/<pageName>")
     def page(pageName):
         content = backend.get_wiki_page(pageName)
-        return render_template("page_Content.html", content = content, user=current_user)
+        page_name = pageName.replace(".txt","")
+        return render_template("page_Content.html", content = content, page_name = page_name, user=current_user)
 
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
