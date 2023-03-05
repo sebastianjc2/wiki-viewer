@@ -72,7 +72,10 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            login_user(user, remember=True)
+            if backend.sign_up(form.username.data, form.password.data):
+                login_user(user, remember=True)
+            else:
+                return "Error"
             return redirect(url_for('home'))
         return render_template("signup.html", form=form, user=current_user)
 
@@ -97,7 +100,8 @@ def make_endpoints(app, backend):
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                #upload = backend.upload(file)
-                return redirect(url_for('download_file', name=filename))                
+                #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                backend.upload(file)
+                #return redirect(url_for('download_file', name=filename))         
+                return redirect(url_for('pages'))       
         return render_template("upload.html", user=current_user)
