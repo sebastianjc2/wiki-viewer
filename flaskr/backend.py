@@ -5,14 +5,13 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FileField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.utils import secure_filename
-from flask_bcrypt import Bcrypt
+import hashlib
 import pages
 import io
 from io import BytesIO
 import pandas 
 
 
-#bcrypt = Bcrypt(app)
 
 
 class Backend:
@@ -42,6 +41,7 @@ class Backend:
         blob.upload_from_file(file)
 
     def sign_up(self, user, password):
+        secret_key = "amogus"
         
         #hashed_password = bcrypt.generate_password_hash(password)
         #new_user = str(form.username.data) + "," + str(hashed_password)
@@ -49,17 +49,25 @@ class Backend:
         #with blob.open("a") as f:
                 #f.write(new_user + "\n")
         #return redirect(url_for('login'))
+        if " " in user or "," in user or "\\" in user or "/" in user:
+            return "Invalid characters in username."
         blob = self.users_passwords_bucket.blob(user + '.txt')
+        with_salt = f"{user}{secret_key}{password}"
+        password = hashlib.blake2b(with_salt.encode()).hexdigest()
         if blob.exists(self.storage_client):
-            return False
+            return "Username is taken."
         else:
             with blob.open('w') as f:
                 f.write(password)
-            return True
+            return "Success"
         
 
     def sign_in(self, user, password):
         #form = pages.LoginForm
+        secret_key = "amogus"
+        with_salt = f"{user}{secret_key}{password}"
+        password = hashlib.blake2b(with_salt.encode()).hexdigest()
+
         blob = self.users_passwords_bucket.blob(user + '.txt')
         if blob.exists(self.storage_client):
             with blob.open('r') as f:

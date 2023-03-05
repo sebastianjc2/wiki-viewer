@@ -78,10 +78,13 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            if backend.sign_up(form.username.data, form.password.data):
+            sign_up_status = backend.sign_up(form.username.data, form.password.data)
+            if sign_up_status == "Success":
                 login_user(user, remember=True)
-            else:
+            elif sign_up_status == "Username is taken.":
                 return "That username is already taken."
+            else:
+                return "Invalid characters in username."
             return redirect(url_for('home'))
         return render_template("signup.html", form=form, user=current_user)
 
