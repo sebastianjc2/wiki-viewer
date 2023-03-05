@@ -60,7 +60,13 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if backend stuff went well, then
             user = User(form.username.data)
-            login_user(user, remember=True)
+            sign_in_status = backend.sign_in(form.username.data, form.password.data)
+            if sign_in_status == "Passed":
+                login_user(user, remember=True)
+            elif sign_in_status == "Password fail":
+                return "Password is incorrect."
+            else:
+                return "That username does not exist."
             return redirect(url_for('home'))
         return render_template("login.html", form=form, user=current_user)
     
@@ -75,7 +81,7 @@ def make_endpoints(app, backend):
             if backend.sign_up(form.username.data, form.password.data):
                 login_user(user, remember=True)
             else:
-                return "Error"
+                return "That username is already taken."
             return redirect(url_for('home'))
         return render_template("signup.html", form=form, user=current_user)
 

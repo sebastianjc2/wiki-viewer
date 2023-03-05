@@ -50,12 +50,25 @@ class Backend:
                 #f.write(new_user + "\n")
         #return redirect(url_for('login'))
         blob = self.users_passwords_bucket.blob(user + '.txt')
-        with blob.open('w') as f:
-            f.write(password)
-        return True
+        if blob.exists(self.storage_client):
+            return False
+        else:
+            with blob.open('w') as f:
+                f.write(password)
+            return True
+        
 
-    def sign_in(self):
+    def sign_in(self, user, password):
         #form = pages.LoginForm
+        blob = self.users_passwords_bucket.blob(user + '.txt')
+        if blob.exists(self.storage_client):
+            with blob.open('r') as f:
+                if f.read() == password:
+                    return "Passed"
+                else:
+                    return "Password fail"
+        else:
+            return "Username Fail"
         pass
 
     def get_image(self):
