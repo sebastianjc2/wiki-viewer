@@ -1,16 +1,14 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
 from flask_wtf import FlaskForm
-from flask import send_file
 from wtforms import StringField, PasswordField, FileField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.utils import secure_filename
 import hashlib
 from flaskr.pages import Upload
-import io
 from io import BytesIO
-import pandas 
-
+from PIL import Image
+import base64
 
 
 
@@ -66,7 +64,15 @@ class Backend:
             return "Username Fail"
         pass
 
-    def get_image(self, image, page):
+    def get_image(self, image, page="pages"):
         if page == "about":
-            blob = self.images_about_bucket.blob(image)
-        return send_file(blob, mimetype='image/gif')
+            blob = self.images_about_bucket.get_blob(image)
+            content = blob.download_as_bytes()
+            img = base64.b64encode(content).decode("utf-8")
+            content_type = blob.content_type
+        else:
+            blob = self.wiki_content_bucket.get_blob(image)
+            content = blob.download_as_bytes()
+            img = base64.b64encode(content).decode("utf-8")
+            content_type = blob.content_type
+        return content_type, img
