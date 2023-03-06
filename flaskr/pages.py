@@ -36,7 +36,10 @@ def make_endpoints(app, backend):
 
     @app.route("/about")
     def about():
-        return render_template("about.html", user=current_user)
+        chris_image = backend.get_image('Chris.jpg', "about")
+        sebastian_image = backend.get_image('Sebastian.jpg', "about")
+        chelsea_image = backend.get_image('Chris.jpg', "about")
+        return render_template("about.html", user=current_user, chris=chris_image, sebastian=sebastian_image, chelsea = chelsea_image)
 
     @app.route("/pages")
     def pages():
