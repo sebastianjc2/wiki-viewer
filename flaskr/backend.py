@@ -20,6 +20,7 @@ class Backend:
         self.storage_client = storage.Client()
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
         self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
+        self.images_about_bucket = self.storage_client.bucket("images_about")
         
     def get_wiki_page(self, pageName):
         blob = self.wiki_content_bucket.get_blob(pageName)
@@ -65,6 +66,7 @@ class Backend:
             return "Username Fail"
         pass
 
-    def get_image(self, image):
-        return send_file(image.filename, mimetype='image/gif')
-
+    def get_image(self, image, page):
+        if page == "about":
+            blob = self.images_about_bucket.blob(image)
+        return send_file(blob, mimetype='image/gif')
