@@ -48,9 +48,9 @@ def make_endpoints(app, backend):
 
     @app.route("/pages/<pageName>")
     def page(pageName):
-        content = backend.get_wiki_page(pageName)
-        page_name = pageName.replace(".txt","")
-        return render_template("page_Content.html", content = content, page_name = page_name, user=current_user)
+        page_name = pageName + ".txt"
+        content = backend.get_wiki_page(page_name)
+        return render_template("page_Content.html", content = content, page_name = pageName, user=current_user)
 
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
