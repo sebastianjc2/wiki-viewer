@@ -14,8 +14,8 @@ import base64
 
 class Backend:
 
-    def __init__(self):
-        self.storage_client = storage.Client()
+    def __init__(self, storage_client=storage.Client()):
+        self.storage_client = storage_client
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
         self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
