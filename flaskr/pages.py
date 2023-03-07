@@ -20,7 +20,7 @@ class SignupForm(FlaskForm):
 
 class Upload:
     UPLOAD_FOLDER = '/path/to/the/uploads'
-    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'txt'}
 
 def allowed_file(filename):
     return '.' in filename and \
