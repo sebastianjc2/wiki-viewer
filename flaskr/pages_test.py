@@ -73,3 +73,17 @@ def test_logged_in(app2, client2):
         assert "Logout" in expected
         assert expected == resp.text
 
+def test_individual_page_routing(client):
+    file1 = "This is a test file"
+    page_name = "test"
+
+    with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
+        resp = client.get("/pages/<page_name>")
+        assert resp.status_code == 200
+        print(resp.data.decode("utf-8"))
+        assert file1 in resp.data.decode("utf-8")
+
+def test_upload():
+    pass
+
+
