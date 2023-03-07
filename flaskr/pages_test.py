@@ -20,8 +20,7 @@ def app():
 def client(app):
     return app.test_client()
 
-# TODO(Checkpoint (groups of 4 only) Requirement 4): Change test to
-# match the changes made in the other Checkpoint Requirements.
+
 def test_home_page(client, app):
     resp = client.get("/")
     #print(resp.data)
@@ -42,15 +41,9 @@ def test_pages(client):
         resp = client.get("/pages")
         #print(resp.data)
         assert resp.status_code == 200
+        assert b"Pages contained in this Wiki" in resp.data
         assert b"bla" in resp.data
         assert b"test" in resp.data
-
-# TODO(Project 1): Write tests for other routes.
-def test_pages_2(client):
-    resp = client.get("/pages")
-    assert resp.status_code == 200
-    print(resp.data)
-    assert b"Pages contained in this Wiki" in resp.data
 
 # continue with this one still
 # def test_individual_pages(client, pageName):
@@ -70,32 +63,13 @@ def client2(app2):
     return app2.test_client(app2.test_client_class)
 
 def test_logged_in(app2, client2):
-    # login_manager = LoginManager()
-    # login_manager.init_app(client2)
-
-    # @login_manager.user_loader
-    # def load_user(user_id):
-    #     return User(user_id)
     user=User("Sebastian")
-    with app2.test_client() as c:
-        # with c.session_transaction() as sess:
-        #     sess['user_id'] = 'Sebastian'
-        #     sess['_fresh'] = True # https://flask-login.readthedocs.org/en/latest/#fresh-logins
-        
-        # resp = c.get("/")
+    with app2.test_client(user=user) as c:
         resp = c.get("/")
         assert resp.status_code == 200
         expected = render_template("home.html", user=user)
-        print(expected)
-        print(resp.text)
         assert "Sebastian" in expected
         assert "Welcome to the Wiki, Sebastian!" in expected
         assert "Logout" in expected
         assert expected == resp.text
 
-# def test_request_with_logged_in_user():
-#     user = User("sebastian")
-#     with app2.test_client(user=user) as client:
-#         # This request has user 1 already logged in!
-#         resp = client.get("/")
-#         assert "Upload" in resp.data.decode("utf-8")
