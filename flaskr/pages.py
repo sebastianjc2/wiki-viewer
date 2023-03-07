@@ -57,19 +57,26 @@ def make_endpoints(app, backend):
     @app.route("/login", methods=["POST", "GET"])
     def login():
         form = LoginForm()
+        # print("outside if")
+        # print(form.is_submitted())
+        
         if form.validate_on_submit():
+            # print("inside if")
             #do backend stuff
             # check if backend stuff went well
             # if backend stuff went well, then
             user = User(form.username.data)
             sign_in_status = backend.sign_in(form.username.data, form.password.data)
             if sign_in_status == "Passed":
+                # print("passed")
                 login_user(user, remember=True)
             elif sign_in_status == "Password fail":
                 return "Password is incorrect."
             else:
                 return "That username does not exist."
             return redirect(url_for('home'))
+        # print(form.errors)
+        # print("before render")
         return render_template("login.html", form=form, user=current_user)
     
     @app.route("/signup", methods=["POST", "GET"])

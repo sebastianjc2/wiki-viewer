@@ -1,7 +1,7 @@
 from flaskr.backend import Backend
 from unittest.mock import MagicMock
 
-# TODO(Project 1): Write tests for Backend methods.
+
 def test_get_all_page_names():
     storage_client = MagicMock()
     mocker = Backend(storage_client)

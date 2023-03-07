@@ -10,3 +10,4 @@ Werkzeug==2.2.2
 Flask-WTF
 Pillow
 pybase64
+Flask-Testing
