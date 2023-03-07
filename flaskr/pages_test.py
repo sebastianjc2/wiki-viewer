@@ -37,11 +37,16 @@ def test_pages(client):
         #print(resp.data)
         assert resp.status_code == 200
         assert b"bla" in resp.data
+        assert b"test" in resp.data
 
 # TODO(Project 1): Write tests for other routes.
-# def test_about(client):
-#     resp = client.get("/about")
-#     expected = render_template("about.html")
+def test_pages_2(client):
+    resp = client.get("/pages")
+    assert resp.status_code == 200
+    print(resp.data)
+    assert b"Pages contained in this Wiki" in resp.data
 
+# continue with this one still
+# def test_individual_pages(client, pageName):
+#     resp = client.get("/pages/<pageName>")
 #     assert resp.status_code == 200
-#     assert expected == resp.data

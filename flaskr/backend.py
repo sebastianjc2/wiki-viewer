@@ -31,7 +31,11 @@ class Backend:
 
     def upload(self, file):
         blob = self.wiki_content_bucket.blob(file.filename)
-        blob.upload_from_file(file)
+        if blob.exists(self.storage_client):
+            return "Exists"
+        else:
+            blob.upload_from_file(file)
+            return "Passed"
 
     def sign_up(self, user, password):
         secret_key = '5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
