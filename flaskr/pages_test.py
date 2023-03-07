@@ -66,12 +66,36 @@ def test_individual_page(client):
         #print(resp.data.decode("utf-8"))
         assert file1 in resp.data.decode("utf-8")
 
+def test_individual_page_routing(client):
+    file1 = "This is a test file"
+    page_name = "test"
+
+    with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
+        resp = client.get("/pages/<page_name>")
+        assert resp.status_code == 200
+        print(resp.data.decode("utf-8"))
+        assert file1 in resp.data.decode("utf-8")
+
+def test_upload():
+    pass
 
 
 # continue with this one still
 # def test_individual_pages(client, pageName):
 #     resp = client.get("/pages/<pageName>")
 #     assert resp.status_code == 200
+
+
+
+
+
+
+
+
+
+
+
+''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
 
 @pytest.fixture
 def app2():
@@ -151,3 +175,6 @@ def test_login_post4(app2, client2):
                                             "password":"test1234",
                                             "submit":"Login"})
             assert resp.text == "That username does not exist." # Means it redirected
+
+
+
