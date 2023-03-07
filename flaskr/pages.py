@@ -106,13 +106,12 @@ def make_endpoints(app, backend):
             file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
-            if file.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
             if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
+                #filename = secure_filename(file.filename)
                 #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                backend.upload(file)
-                #return redirect(url_for('download_file', name=filename))         
+                upload_outcome = backend.upload(file)
+                #return redirect(url_for('download_file', name=filename))
+                if upload_outcome == "Exists":
+                    return "A file by this name already exists."         
                 return redirect(url_for('pages'))       
         return render_template("upload.html", user=current_user)
