@@ -68,6 +68,7 @@ class Backend:
             return "Username Fail"
         pass
 
+
     def get_image(self, image, page="pages"):
         if page == "about":
             blob = self.images_about_bucket.get_blob(image)

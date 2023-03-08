@@ -121,6 +121,7 @@ def test_navbar_change_when_logged_in(app2, client2):
         assert "Logout" in expected
         assert expected == resp.text
 
+
 def test_login_template(app2, client2):
     with app2.app_context():
         form = MagicMock()
@@ -134,10 +135,11 @@ def test_login_template(app2, client2):
         assert "username" in expected and "username" in resp.text
         assert "password" in expected and "password" in resp.text
         assert "submit" in expected and "submit" in resp.text
+        assert "Login" in expected and "Login" in resp.text
         # assert expected == resp.text
 
 
-def test_login_post2(app2, client2):
+def test_login_post_redirects_TRUE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Passed"):
             resp = c.post("/login", data={"csrf_token":"Ignore",
@@ -145,9 +147,11 @@ def test_login_post2(app2, client2):
                                                 "password":"test1234",
                                                 "submit":"Login"}, follow_redirects=True)                                                
             assert "Bob" in resp.text
-            assert resp.status_code == 200
+            assert resp.status_code == 200 # Means it already redirected to home
+            # Already redirected because follow_redirects=True
             
-def test_login_post_code(app2, client2):
+
+def test_login_post_auto_redirects_FALSE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Passed"):
             resp = c.post("/login", data={"csrf_token":"Ignore",
@@ -155,26 +159,102 @@ def test_login_post_code(app2, client2):
                                                 "password":"test1234",
                                                 "submit":"Login"}, follow_redirects=False)
 
-            assert resp.status_code == 302
+            assert "Redirecting" in resp.text
+            assert resp.status_code == 302 # Mean's its in the process of redirecting
+            # Hasn't redirected yet because follow_redirects=False
             
 
-def test_login_post3(app2, client2):
+def test_login_post_wrong_password(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Password fail"):
             resp = c.post("/login", data={"csrf_token":"Ignore",
                                             "username":"Bob",
                                             "password":"test1234",
                                             "submit":"Login"})
-            assert resp.text == "Password is incorrect." # Means it redirected
+            assert resp.text == "Password is incorrect." 
 
-def test_login_post4(app2, client2):
+
+def test_login_post_non_existing_username(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Username Fail"):
             resp = c.post("/login", data={"csrf_token":"Ignore",
                                             "username":"Bob",
                                             "password":"test1234",
                                             "submit":"Login"})
-            assert resp.text == "That username does not exist." # Means it redirected
+            assert resp.text == "That username does not exist." 
 
 
+def test_signup_template(app2, client2):
+    with app2.app_context():
+        form = MagicMock()
+        # form.username = '<input id="username" maxlength="25" minlength="3" name="username" required type="text" value="Bob">'
+        # form.hidden_tag.return_value = '<input id="csrf_token" name="csrf_token" type="hidden" value="IjhmYzQzOGY4MDQyYmI5YmM4OWU5MTQ5YjFlMTYxOTQ3NzQ3MjYwODAi.ZAea6Q.chsyN2xGVvv9Q7RWn8RnVvcRqEs">'
+        resp = client2.get("/signup")
+        assert resp.status_code == 200
+        #print(resp.text)
+        expected = render_template("signup.html", form=form, user=current_user)
+        #print(expected)
+        assert "username" in expected and "username" in resp.text
+        assert "password" in expected and "password" in resp.text
+        assert "submit" in expected and "submit" in resp.text
+        assert "Sign Up" in expected and "Sign Up" in resp.text
 
+def test_signup_post_redirects_TRUE(app2, client2):
+    with client2 as c:
+        with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
+            resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                                "username":"Bob",
+                                                "password":"test1234",
+                                                "submit":"Login"}, follow_redirects=True)                                                
+            assert "Bob" in resp.text
+            assert resp.status_code == 200 # Means it already redirected to home
+            # Already redirected because follow_redirects=True
+
+def test_signup_post_auto_redirects_FALSE(app2, client2):
+    with client2 as c:
+        with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
+            resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                                "username":"Bob",
+                                                "password":"test1234",
+                                                "submit":"Login"}, follow_redirects=False)
+
+            assert "Redirecting" in resp.text
+            assert resp.status_code == 302 # Mean's its in the process of redirecting
+            # Hasn't redirected yet because follow_redirects=False
+
+def test_signup_post_username_already_taken(app2, client2):
+    with client2 as c:
+        with patch("flaskr.backend.Backend.sign_up", return_value = "Username is taken."):
+            resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                            "username":"Bob",
+                                            "password":"test1234",
+                                            "submit":"Login"})
+            assert resp.text == "That username is already taken." 
+
+def test_signup_post_invalid_characters(app2, client2):
+    with client2 as c:
+        with patch("flaskr.backend.Backend.sign_up", return_value = "Invalid characters in username."):
+            resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                            "username":"Bob",
+                                            "password":"test1234",
+                                            "submit":"Login"})
+            assert resp.text == "Invalid characters in username." 
+
+    
+def test_log_out(app2, client2):
+    user=User("Sebastian")
+    assert user.is_anonymous == False
+    with app2.test_client(user=user) as c:
+        resp = c.get("/logout")
+        assert resp.status_code == 302 # should be 302 because we should be redirecting to home page
+        assert current_user.is_anonymous == True # should be True now, since we are being logged out    
+
+
+def test_log_out_redirects_TRUE(app2, client2):
+    user=User("Sebastian")
+    assert user.is_anonymous == False
+    with app2.test_client(user=user) as c:
+        resp = c.post("/logout", follow_redirects=True)
+        assert resp.status_code == 200 # should be 200 because redirects are on, so we should be at the home page now
+        assert current_user.is_anonymous == True # should be True now, since we are being logged out    
+        assert "Welcome to the Wiki!" in resp.text # should be True because we should have been redirected to the home page
