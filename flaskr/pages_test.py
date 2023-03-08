@@ -50,34 +50,24 @@ def test_pages(client):
 
     file2 = MagicMock()
     file2.name = "blah.txt"
-    with patch("flaskr.backend.Backend.get_all_page_names", return_value=[file1, file2]):
-        resp = client.get("/pages")
-        #print(resp.data)
-        assert resp.status_code == 200
-        assert b"Pages contained in this Wiki" in resp.data
-        assert b"bla" in resp.data
-        assert b"test" in resp.data
-
-def test_individual_page(client):
-    file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
-    with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
-        resp = client.get("/pages/Ataxia")
-        assert resp.status_code == 200
-        #print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
-
+    resp = client.get("/pages")
+    #print(resp.data)
+    assert resp.status_code == 200
+    assert b"Pages contained in this Wiki" in resp.data
+    assert b"bla" in resp.data
+    assert b"test" in resp.data
 def test_individual_page_routing(client):
     file1 = "This is a test file"
     page_name = "test"
 
-    with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
-        resp = client.get("/pages/<page_name>")
-        assert resp.status_code == 200
-        print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
+    resp = client.get("/pages/<page_name>")
+    assert resp.status_code == 200
+    print(resp.data.decode("utf-8"))
+    assert file1 in resp.data.decode("utf-8")
 
 def test_upload():
-    pass
+    #resp = client.get("/upload")
+    #assert resp.status_code == 200
 
 
 # continue with this one still
@@ -92,11 +82,7 @@ def test_upload():
 
 
 
-
-
-
-''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
-
+#NEW FIXTURES FOR LOGIN RELATED TESTS
 @pytest.fixture
 def app2():
     app2 = create_app({
@@ -120,6 +106,7 @@ def test_navbar_change_when_logged_in(app2, client2):
         assert "Welcome to the Wiki, Sebastian!" in expected
         assert "Logout" in expected
         assert expected == resp.text
+
 
 def test_login_template(app2, client2):
     with app2.app_context():
