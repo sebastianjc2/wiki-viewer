@@ -13,6 +13,8 @@ from flask_testing import TestCase
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/ 
 # for more info on testing
+''' FIXTURES FOR LOGGED OUT FEATURES '''
+
 @pytest.fixture
 def app():
     app = create_app({
@@ -90,11 +92,6 @@ def test_upload():
 
 
 
-
-
-
-
-
 ''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
 
 @pytest.fixture
@@ -110,7 +107,7 @@ def client2(app2):
     app2.test_client_class = FlaskLoginClient
     return app2.test_client(app2.test_client_class)
 
-def test_navbar_change_when_logged_in(app2, client2):
+def test_navbar_and_home_page_change_when_logged_in(app2, client2):
     user=User("Sebastian")
     with app2.test_client(user=user) as c:
         resp = c.get("/")

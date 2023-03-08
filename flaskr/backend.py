@@ -71,11 +71,20 @@ class Backend:
 
     def get_image(self, image, page="pages"):
         if page == "about":
+            print("in about")
             blob = self.images_about_bucket.get_blob(image)
+            print(blob)
             content = blob.download_as_bytes()
+            print(content)
+            print("before encoding")
             img = base64.b64encode(content).decode("utf-8")
+            print("after decoding")
+            print(img)
             content_type = blob.content_type
+            print(content_type)
         else:
+            print("in else")
+
             blob = self.wiki_content_bucket.get_blob(image)
             content = blob.download_as_bytes()
             img = base64.b64encode(content).decode("utf-8")
