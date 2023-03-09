@@ -14,18 +14,22 @@ import base64
 
 class Backend:
 
+    #Initializing the storage client and the buckets, uses an automatic assignment
+    #that lets the storage client to be assigned normally if not specified, but allows
+    #mocking if the storage_client argument is filled using a magicmock object.
     def __init__(self, storage_client=storage.Client()):
         self.storage_client = storage_client
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
         self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
         
-    #Returns and reads a page from the wiki content bucket
+    #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
         blob = self.wiki_content_bucket.get_blob(pageName)
         with blob.open("r") as f:
             return f.read()
 
+    #Returns a list of all the files uploaded to the wiki-content bucket
     def get_all_page_names(self):
         blobs = self.storage_client.list_blobs("wiki-content")
         return blobs
