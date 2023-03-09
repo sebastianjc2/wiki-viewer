@@ -44,7 +44,7 @@ def make_endpoints(app, backend):
         chelsea_image_type, chelsea_image = backend.get_image('Chelsea.jpg', "about")
         return render_template("about.html", user=current_user, chris_image_type=chris_image_type, chris=chris_image, sebastian_image_type=sebastian_image_type, sebastian=sebastian_image, chelsea_image_type=chelsea_image_type, chelsea = chelsea_image)
 
-''' This will be the about page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
+    ''' This will be the about page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
     This will get called with /pages in the url and renders the pages.html template'''
     @app.route("/pages")
     def pages():

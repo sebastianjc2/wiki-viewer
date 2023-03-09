@@ -248,7 +248,7 @@ def test_signup_post_username_already_taken(app2, client2):
             assert resp.text == "That username is already taken." 
 
 ''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Invalid characters in username."
-which means that the user entered a username that has invalid characters (" ", "/", "\, etc"). Then, we assert that it takes you to the page where it says 
+which means that the user entered a username that has invalid characters (" ", "/", ",", etc"). Then, we assert that it takes you to the page where it says 
 "Invalid characters in username."'''
 def test_signup_post_invalid_characters(app2, client2):
     with client2 as c:
