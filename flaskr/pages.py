@@ -29,11 +29,14 @@ def allowed_file(filename):
 def make_endpoints(app, backend):
     # Flask uses the "app.route" decorator to call methods when users
     # go to a specific route on the project's website.
+    ''' This will be the home page template, the default template that gets shown when you enter the wiki '''
     @app.route("/")
     def home():
         # TODO(Checkpoint Requirement 2 of 3): Change this to use render_template
         return render_template("home.html", user=current_user)
 
+    ''' This will be the about page, and our function uses backend.get_image to get all 3 of our images from the buckets, and include them in this page.
+    This will get called with /about in the url '''
     @app.route("/about")
     def about():
         chris_image_type, chris_image = backend.get_image('Chris.jpg', "about")
@@ -41,10 +44,13 @@ def make_endpoints(app, backend):
         chelsea_image_type, chelsea_image = backend.get_image('Chelsea.jpg', "about")
         return render_template("about.html", user=current_user, chris_image_type=chris_image_type, chris=chris_image, sebastian_image_type=sebastian_image_type, sebastian=sebastian_image, chelsea_image_type=chelsea_image_type, chelsea = chelsea_image)
 
+''' This will be the about page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
+    This will get called with /pages in the url and renders the pages.html template'''
     @app.route("/pages")
     def pages():
         pages = backend.get_all_page_names()
         return render_template("pages.html", pages = pages, user=current_user)
+
 
     @app.route("/pages/<pageName>")
     def page(pageName):
@@ -53,7 +59,10 @@ def make_endpoints(app, backend):
         return render_template("page_Content.html", content = content, page_name = pageName, user=current_user)
 
 
-    # TODO(Project 1): Implement additional routes according to the project requirements.
+    ''' This will be the login page. This will get called with /login in the url and renders the login.html template
+    We use LoginForm to collect the username and password and show the fields on the page, once it is submitted it uses 
+    backend.sign_in with that username and password and make sure it matches the info for an existing user, and if it does,
+    it logs the user in and redirects them to the home page.'''
     @app.route("/login", methods=["POST", "GET"])
     def login():
         form = LoginForm()
@@ -79,6 +88,11 @@ def make_endpoints(app, backend):
         # print("before render")
         return render_template("login.html", form=form, user=current_user)
     
+
+    ''' This will be the sign up page. This will get called with /signup in the url and renders the login.html template
+    We use SignupForm to collect the username and password and show the fields on the page, once it is submitted it uses 
+    backend.sign_up with that username and password and make sure the username is valid and does not already exist. 
+    If everything goes well, it logs the user in and redirects them to the home page.'''
     @app.route("/signup", methods=["POST", "GET"])
     def sign_up():
         form = SignupForm()
@@ -98,12 +112,16 @@ def make_endpoints(app, backend):
         return render_template("signup.html", form=form, user=current_user)
 
 
+    '''This is called with the /logout route and requires the user to be logged in already. It logs out the user, and redirects them to the home page'''
     @app.route("/logout", methods=["POST", "GET"])
+    @login_required
     def log_out():
         logout_user()
         return redirect(url_for('home'))
 
+    ''' This is called with the /upload route and requires the user to be logged in already'''
     @app.route('/upload', methods=['GET', 'POST'])
+    @login_required
     def upload_file():
         if request.method == 'POST':
         # check if the post request has the file part
