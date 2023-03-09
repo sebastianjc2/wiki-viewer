@@ -1,7 +1,6 @@
 from flaskr.backend import Backend
 from unittest.mock import MagicMock
 import base64
-import flask_testing
 
 def mock_open(mock_value):
     class MockOpen:

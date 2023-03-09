@@ -9,7 +9,6 @@ from flask_login import current_user, FlaskLoginClient, login_user, logout_user,
 from flaskr.pages import LoginForm, SignupForm
 import pytest
 import unittest
-from flask_testing import TestCase
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/ 
 # for more info on testing
@@ -87,10 +86,6 @@ def test_individual_page_routing(client):
         assert file1 in resp.data.decode("utf-8")
 
         
-def test_upload():
-    pass
-
-
 ''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
 
 @pytest.fixture
@@ -278,3 +273,26 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert resp.status_code == 200 # should be 200 because redirects are on, so we should be at the home page now
         assert current_user.is_anonymous == True # should be True now, since we are being logged out    
         assert "Welcome to the Wiki!" in resp.text # should be True because we should have been redirected to the home page
+
+''' Tests the GET method of the /upload route. Makes sure that the user is logged in to upload and it makes sure that it calls the upload.html form for the user to upload their file.'''
+def test_upload_get(app2,client2):
+    user=User("Sebastian")
+    with app2.test_client(user=user) as c:
+        assert user.is_anonymous == False
+        resp = c.get("/upload")
+        assert resp.status_code == 200
+        expected = render_template("upload.html", user=user)
+        assert expected == resp.text    
+
+''' Tests the POST method of the /upload route. Makes sure that the user is logged in to upload and it makes sure that after the user uploads the file, it reroutes back to the Pages page.'''
+def test_upload_post(app2, client2):
+    file1 = MagicMock()
+    file1.name = "test.txt"
+    user=User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.upload", return_value = "Passed"):
+            resp = c.post("/upload", follow_redirects=True, data={
+                                            "file":"test.txt"})            
+            assert resp.status_code == 200 
+            assert "Pages contained in this Wiki" in resp.text 
+

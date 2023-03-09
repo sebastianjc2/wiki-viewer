@@ -44,14 +44,15 @@ def make_endpoints(app, backend):
         chelsea_image_type, chelsea_image = backend.get_image('Chelsea.jpg', "about")
         return render_template("about.html", user=current_user, chris_image_type=chris_image_type, chris=chris_image, sebastian_image_type=sebastian_image_type, sebastian=sebastian_image, chelsea_image_type=chelsea_image_type, chelsea = chelsea_image)
 
-    ''' This will be the about page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
+    ''' This will be the Pages page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
     This will get called with /pages in the url and renders the pages.html template'''
     @app.route("/pages")
     def pages():
         pages = backend.get_all_page_names()
         return render_template("pages.html", pages = pages, user=current_user)
 
-
+    ''' This function routes to the specific individual wiki pages with band content in them, and it uses backend.get_wiki_page to get all the content from the bucket for this specific wiki page.
+    This will get called with /pages/<pagename> in the url and renders the pages_Content.html template'''
     @app.route("/pages/<pageName>")
     def page(pageName):
         page_name = pageName + ".txt"
@@ -70,10 +71,6 @@ def make_endpoints(app, backend):
         # print(form.is_submitted())
         
         if form.validate_on_submit():
-            # print("inside if")
-            #do backend stuff
-            # check if backend stuff went well
-            # if backend stuff went well, then
             user = User(form.username.data)
             sign_in_status = backend.sign_in(form.username.data, form.password.data)
             if sign_in_status == "Passed":
@@ -119,7 +116,10 @@ def make_endpoints(app, backend):
         logout_user()
         return redirect(url_for('home'))
 
-    ''' This is called with the /upload route and requires the user to be logged in already'''
+    ''' This is called with the /upload route and requires the user to be logged in already.
+    The way this function works is if there is no file inputted, it will stay on the same page until the user inputs a file.
+    If there is a file uploaded and its valid, but it already exists in the content bucket, it will tell the user the file already exists.
+    If there is a file uploaded, the file is valid, and it does not already exist in the content bucket, it will reroute the user back to the Pages page once the file is uploaded.'''
     @app.route('/upload', methods=['GET', 'POST'])
     @login_required
     def upload_file():
@@ -132,10 +132,7 @@ def make_endpoints(app, backend):
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
             if file and allowed_file(file.filename):
-                #filename = secure_filename(file.filename)
-                #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 upload_outcome = backend.upload(file)
-                #return redirect(url_for('download_file', name=filename))
                 if upload_outcome == "Exists":
                     return "A file by this name already exists."         
                 return redirect(url_for('pages'))       
