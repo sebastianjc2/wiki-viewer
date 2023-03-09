@@ -60,12 +60,13 @@ def test_pages(client):
         assert b"bla" in resp.data
         assert b"test" in resp.data
 
+
 def test_individual_page(client):
     file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/Ataxia")
         assert resp.status_code == 200
-        #print(resp.data.decode("utf-8"))
+        print(resp.data.decode("utf-8"))
         assert file1 in resp.data.decode("utf-8")
 
 def test_individual_page_routing(client):
@@ -78,18 +79,9 @@ def test_individual_page_routing(client):
         print(resp.data.decode("utf-8"))
         assert file1 in resp.data.decode("utf-8")
 
+        
 def test_upload():
     pass
-
-
-# continue with this one still
-# def test_individual_pages(client, pageName):
-#     resp = client.get("/pages/<pageName>")
-#     assert resp.status_code == 200
-
-
-
-
 
 
 ''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
@@ -133,7 +125,6 @@ def test_login_template(app2, client2):
         assert "password" in expected and "password" in resp.text
         assert "submit" in expected and "submit" in resp.text
         assert "Login" in expected and "Login" in resp.text
-        # assert expected == resp.text
 
 
 def test_login_post_redirects_TRUE(app2, client2):
