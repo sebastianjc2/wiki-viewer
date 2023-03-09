@@ -26,7 +26,8 @@ def app():
 def client(app):
     return app.test_client()
 
-
+''' Tests the home page while logged out, it asserts that Welcome to the Wiki! is in the resp.data when you get "/", because Welcome to the Wiki, {{user}}
+would show up if a user is logged in.'''
 def test_home_page_while_logged_out(client, app):
     resp = client.get("/")
     #print(resp.data)
@@ -37,6 +38,8 @@ def test_home_page_while_logged_out(client, app):
         assert b"Welcome to the Wiki!" in resp.data
         assert expected == resp.data.decode("utf-8")
 
+'''It tests that the about page status_code after doing client.get is correct, which means it did GET correctly, and also asserts that our names are in
+the template, as well as in the resp.text'''
 def test_about(client, app):
     resp = client.get("/about")
     assert resp.status_code == 200
@@ -46,6 +49,8 @@ def test_about(client, app):
         assert "Christopher Cordero" in resp.text and "Christopher Cordero" in expected
         assert "Chelsea Garcia" in resp.text and "Chelsea Garcia" in expected
 
+''' Test for the /pages route. We first mock 2 file names, and add them into the list. We mock get_all_page_names from the backend to return said list.
+Then, we verify that when going into the /pages route, the status code is 200, and the filenames that we added should be in resp.data.'''
 def test_pages(client):
     file1 = MagicMock()
     file1.name = "test.txt"
@@ -60,7 +65,8 @@ def test_pages(client):
         assert b"bla" in resp.data
         assert b"test" in resp.data
 
-
+'''Test for the individual page routing (/pages/<page>). We give it a string containing what should be in the page, and then mock the "get_wiki_page"
+backend method to return that string. Then once we do client.get(/pages/Ataxia), we assert that the string is inside that response.'''
 def test_individual_page(client):
     file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
@@ -69,6 +75,7 @@ def test_individual_page(client):
         print(resp.data.decode("utf-8"))
         assert file1 in resp.data.decode("utf-8")
 
+''' Same as above, with also a test page name'''
 def test_individual_page_routing(client):
     file1 = "This is a test file"
     page_name = "test"
@@ -99,6 +106,9 @@ def client2(app2):
     app2.test_client_class = FlaskLoginClient
     return app2.test_client(app2.test_client_class)
 
+''' This tests the navbar (and at the same time, the home page) changes once a user is logged in.
+We do that by creating a user and passing it to the test client, and by creating the user, .is_authenticated is turned on by default.
+So, once the response gets the / route, it will see the changes in the navbar, and also the username in both the navbar and the home page.'''
 def test_navbar_and_home_page_change_when_logged_in(app2, client2):
     user=User("Sebastian")
     with app2.test_client(user=user) as c:
@@ -110,12 +120,10 @@ def test_navbar_and_home_page_change_when_logged_in(app2, client2):
         assert "Logout" in expected
         assert expected == resp.text
 
-
+''' It tests that the response is correctly GETting the login template (when the /login route is called)'''
 def test_login_template(app2, client2):
     with app2.app_context():
         form = MagicMock()
-        # form.username = '<input id="username" maxlength="25" minlength="3" name="username" required type="text" value="Bob">'
-        # form.hidden_tag.return_value = '<input id="csrf_token" name="csrf_token" type="hidden" value="IjhmYzQzOGY4MDQyYmI5YmM4OWU5MTQ5YjFlMTYxOTQ3NzQ3MjYwODAi.ZAea6Q.chsyN2xGVvv9Q7RWn8RnVvcRqEs">'
         resp = client2.get("/login")
         assert resp.status_code == 200
         #print(resp.text)
@@ -126,7 +134,10 @@ def test_login_template(app2, client2):
         assert "submit" in expected and "submit" in resp.text
         assert "Login" in expected and "Login" in resp.text
 
-
+''' It tests the POST method of the /login route (when the form is submitted). For this, we mock the sign_in backend method to return "Passed"
+which means that everything went well (it was a valid and existing username and password). Then, we give it some dummy data to enter in the fields
+with the username "Bob". Since we have redirects to be automatically followed, we assert that "Bob" is in resp.text, which should be the home page
+template, because Bob will appear in both the "Welcome to the Wiki, Bob!" message, and in the navbar.'''
 def test_login_post_redirects_TRUE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Passed"):
@@ -138,7 +149,10 @@ def test_login_post_redirects_TRUE(app2, client2):
             assert resp.status_code == 200 # Means it already redirected to home
             # Already redirected because follow_redirects=True
             
-
+''' It tests the POST method of the /login route (when the form is submitted). For this, we mock the sign_in backend method to return "Passed"
+which means that everything went well (it was a valid and existing username and password). Then, we give it some dummy data to enter in the fields
+with the username "Bob". Since we have redirects to NOT be automatically followed, we assert that "Redirecting" is in resp.text, which is what it says
+if the redirect is taking too long. We also test the status code to be 302, which indicates temporary redirecting.'''
 def test_login_post_auto_redirects_FALSE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Passed"):
@@ -151,7 +165,9 @@ def test_login_post_auto_redirects_FALSE(app2, client2):
             assert resp.status_code == 302 # Mean's its in the process of redirecting
             # Hasn't redirected yet because follow_redirects=False
             
-
+''' It tests the POST method of the /login route (when the form is submitted). For this, we mock the sign_in backend method to return "Password Fail"
+which means that the user entered a wrong password (that doesn't match the username). Then, we assert that it takes you to the page where it says "Password
+is incorrect."'''
 def test_login_post_wrong_password(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Password fail"):
@@ -161,7 +177,8 @@ def test_login_post_wrong_password(app2, client2):
                                             "submit":"Login"})
             assert resp.text == "Password is incorrect." 
 
-
+''' It tests the POST method of the /login route (when the form is submitted). For this, we mock the sign_in backend method to return "Username Fail"
+which means that the user entered a non existing username. Then, we assert that it takes you to the page where it says "That username does not exist."'''
 def test_login_post_non_existing_username(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_in", return_value = "Username Fail"):
@@ -171,7 +188,7 @@ def test_login_post_non_existing_username(app2, client2):
                                             "submit":"Login"})
             assert resp.text == "That username does not exist." 
 
-
+''' It tests that the response is correctly GETting the signup template (when the /signup route is called)'''
 def test_signup_template(app2, client2):
     with app2.app_context():
         form = MagicMock()
@@ -187,6 +204,10 @@ def test_signup_template(app2, client2):
         assert "submit" in expected and "submit" in resp.text
         assert "Sign Up" in expected and "Sign Up" in resp.text
 
+''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Success"
+which means that everything went well (it was a valid and unique username). Then, we give it some dummy data to enter in the fields
+with the username "Bob". Since we have redirects to be automatically followed, we assert that "Bob" is in resp.text, which should be the home page
+template, because Bob will appear in both the "Welcome to the Wiki, Bob!" message, and in the navbar.'''
 def test_signup_post_redirects_TRUE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
@@ -198,6 +219,10 @@ def test_signup_post_redirects_TRUE(app2, client2):
             assert resp.status_code == 200 # Means it already redirected to home
             # Already redirected because follow_redirects=True
 
+''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Success"
+which means that everything went well (it was a valid and unique username). Then, we give it some dummy data to enter in the fields
+with the username "Bob". Since we have redirects to NOT be automatically followed, we assert that "Redirecting" is in resp.text, which is what it says
+if the redirect is taking too long. We also test the status code to be 302, which indicates temporary redirecting.'''
 def test_signup_post_auto_redirects_FALSE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
@@ -210,6 +235,9 @@ def test_signup_post_auto_redirects_FALSE(app2, client2):
             assert resp.status_code == 302 # Mean's its in the process of redirecting
             # Hasn't redirected yet because follow_redirects=False
 
+''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Username is taken."
+which means that the user entered a username that already exists in the database. Then, we assert that it takes you to the page where it says "That username
+is already taken."'''
 def test_signup_post_username_already_taken(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Username is taken."):
@@ -219,6 +247,9 @@ def test_signup_post_username_already_taken(app2, client2):
                                             "submit":"Login"})
             assert resp.text == "That username is already taken." 
 
+''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Invalid characters in username."
+which means that the user entered a username that has invalid characters (" ", "/", "\, etc"). Then, we assert that it takes you to the page where it says 
+"Invalid characters in username."'''
 def test_signup_post_invalid_characters(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Invalid characters in username."):
@@ -228,7 +259,7 @@ def test_signup_post_invalid_characters(app2, client2):
                                             "submit":"Login"})
             assert resp.text == "Invalid characters in username." 
 
-    
+'''Tests the GET method of the /logout route, which should be the logout.html template. Checks that the status code is 302, because it should redirect you to home page after logging out'''
 def test_log_out(app2, client2):
     user=User("Sebastian")
     assert user.is_anonymous == False
@@ -237,7 +268,8 @@ def test_log_out(app2, client2):
         assert resp.status_code == 302 # should be 302 because we should be redirecting to home page
         assert current_user.is_anonymous == True # should be True now, since we are being logged out    
 
-
+''' Tests the POST method of the /logout route. Asserts that the user is now anonymous since we're being logged out, that we got redirected, since follow_redirects = True,
+and that Welcome to the Wiki! is now in the response text, because by that point we should be in the home page'''
 def test_log_out_redirects_TRUE(app2, client2):
     user=User("Sebastian")
     assert user.is_anonymous == False
