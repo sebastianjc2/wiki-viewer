@@ -22,7 +22,8 @@ def mock_open(mock_value):
 
     return MockOpen
 
-
+''' Tests that get all page names is working by mocking the storage client and mocking the pages.
+Once we call get all page names with the mocker, it should be the same list of pages as the return value we had set'''
 def test_get_all_page_names():
     storage_client = MagicMock()
     mocker = Backend(storage_client)
@@ -31,6 +32,7 @@ def test_get_all_page_names():
 
     assert mocker.get_all_page_names() == ["test.txt", "bla.txt"]
 
+''' Tests that the image is getting collected, downloaded as bytes, then encoded, decoded correctly '''
 def test_get_image():
     storage_client = MagicMock()
     image_bucket = MagicMock()
@@ -40,7 +42,6 @@ def test_get_image():
     blob = MagicMock()
     image_bucket.get_blob.return_value = blob
 
-    bytes_val = base64.b64encode(b"Test").decode("utf-8")
     blob.download_as_bytes.return_value = b"Test"
 
     blob.content_type = "image/jpeg"
