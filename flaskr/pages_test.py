@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 from flask_login import current_user, FlaskLoginClient, login_user, logout_user, LoginManager
 from flaskr.pages import LoginForm, SignupForm
 import pytest
+import io
 import unittest
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/ 
@@ -286,13 +287,11 @@ def test_upload_get(app2,client2):
 
 ''' Tests the POST method of the /upload route. Makes sure that the user is logged in to upload and it makes sure that after the user uploads the file, it reroutes back to the Pages page.'''
 def test_upload_post(app2, client2):
-    file1 = MagicMock()
-    file1.name = "test.txt"
     user=User("Sebastian")
     with app2.test_client(user=user) as c:
         with patch("flaskr.backend.Backend.upload", return_value = "Passed"):
-            resp = c.post("/upload", follow_redirects=True, data={
-                                            "file":"test.txt"})            
+            resp = c.post("/upload", follow_redirects=True, data=dict(file=(io.BytesIO(b"this is a test"), 'test.txt')))
+            print(resp.text)
             assert resp.status_code == 200 
-            assert "Pages contained in this Wiki" in resp.text 
+            assert "Pages contained in this Wiki" in resp.text
 
