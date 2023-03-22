@@ -295,3 +295,4 @@ def test_upload_post(app2, client2):
             assert resp.status_code == 200 
             assert "Pages contained in this Wiki" in resp.text
 
+#CI test 
