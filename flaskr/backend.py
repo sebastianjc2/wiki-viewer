@@ -11,7 +11,6 @@ from PIL import Image
 import base64
 
 
-
 class Backend:
 
     #Initializing the storage client and the buckets, uses an automatic assignment
@@ -20,9 +19,10 @@ class Backend:
     def __init__(self, storage_client=storage.Client()):
         self.storage_client = storage_client
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
-        self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
+        self.users_passwords_bucket = self.storage_client.bucket(
+            "users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
-        
+
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
         blob = self.wiki_content_bucket.get_blob(pageName)
@@ -38,7 +38,7 @@ class Backend:
     def upload(self, file):
         #Creates a blob
         blob = self.wiki_content_bucket.blob(file.filename)
-        #Checks if it already exists 
+        #Checks if it already exists
         if blob.exists(self.storage_client):
             #If it does, return without upload
             return "Exists"
@@ -58,7 +58,7 @@ class Backend:
             return "Invalid characters in username."
         blob = self.users_passwords_bucket.blob(user + '.txt')
         #Adds 'salt' to the password before hashing to make it so two people with the same
-        #password don't have the same hash. The secret key also helps to further obscure the data. 
+        #password don't have the same hash. The secret key also helps to further obscure the data.
         with_salt = f"{user}{secret_key}{password}"
         #Hashes the password for storage
         password = hashlib.blake2b(with_salt.encode()).hexdigest()
@@ -71,13 +71,12 @@ class Backend:
             with blob.open('w') as f:
                 f.write(password)
             return "Success"
-        
 
     def sign_in(self, user, password):
         #Generated random key with secrets.token_hex()
         #Same secret key used in sign up so the sign in works properly
         secret_key = '5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
-        #Adds all the same 'salt' to the password before hashing so the outcome 
+        #Adds all the same 'salt' to the password before hashing so the outcome
         #will be the same as when signing up (if its the same password)
         with_salt = f"{user}{secret_key}{password}"
         password = hashlib.blake2b(with_salt.encode()).hexdigest()
@@ -85,20 +84,19 @@ class Backend:
         blob = self.users_passwords_bucket.blob(user + '.txt')
         #Checks if the user exists
         if blob.exists(self.storage_client):
-            #Reads the blob and compares the hashed password saved there 
+            #Reads the blob and compares the hashed password saved there
             #to the one input and hashed in this method
             with blob.open('r') as f:
                 #If theyre the same, it passes
                 if f.read() == password:
                     return "Passed"
-                #Otherwise, fails. 
+                #Otherwise, fails.
                 else:
                     return "Password fail"
         else:
             #If the user doesnt exist, fails.
             return "Username Fail"
         pass
-
 
     def get_image(self, image, page="pages"):
         if page == "about":
