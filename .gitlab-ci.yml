@@ -6,3 +6,4 @@ lint:
  - yapf --recursive . --diff --style google
  only:
  - merge_requests
+ 

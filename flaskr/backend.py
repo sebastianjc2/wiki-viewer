@@ -112,3 +112,4 @@ class Backend:
             img = base64.b64encode(content).decode("utf-8")
             content_type = blob.content_type
         return content_type, img
+        #Blahhhh
