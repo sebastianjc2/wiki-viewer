@@ -24,6 +24,6 @@ prod:
  script: 
  - echo $SERVICE_ACCOUNT > /tmp/$CI_PIPELINE_ID.json
  - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
- - gcloud app deploy --quiet --project $team-bards-wiki-viewer
+ - gcloud app deploy --quiet --project team-bards-wiki-viewer
  only:
  - pushes
