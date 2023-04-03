@@ -13,7 +13,7 @@ unittest:
  - pip install -r requirements.txt
  - pytest
  only:
- - pushes
+ - merge_requests
  
 prod:
  image: google/cloud-sdk:alpine
@@ -26,4 +26,4 @@ prod:
  - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
  - gcloud app deploy --quiet --project team-bards-wiki-viewer
  only:
- - pushes
+ - merge_requests
