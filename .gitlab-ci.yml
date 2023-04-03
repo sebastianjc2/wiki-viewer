@@ -7,3 +7,11 @@ lint:
  only:
  - merge_requests
  
+unittest:
+ stage: test
+ script: 
+ - pip install -r requirements.txt
+ - pytest
+ only:
+ - pushes
+ 
