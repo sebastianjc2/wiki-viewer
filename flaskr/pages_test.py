@@ -28,7 +28,7 @@ def client(app):
 
 ''' Tests the home page while logged out, it asserts that Welcome to the Wiki! is in the resp.data when you get "/", because Welcome to the Wiki, {{user}}
 would show up if a user is logged in.'''
-def test_home_page_while_logged_out(client, app):
+def test_home_page_while_logged_out(app, client):
     resp = client.get("/")
     #print(resp.data)
     assert resp.status_code == 200
@@ -40,18 +40,19 @@ def test_home_page_while_logged_out(client, app):
 
 '''It tests that the about page status_code after doing client.get is correct, which means it did GET correctly, and also asserts that our names are in
 the template, as well as in the resp.text'''
-def ignore_test_about(client, app):
+def test_about(app, client):
     resp = client.get("/about")
     assert resp.status_code == 200
     with app.app_context():
-        expected = render_template("about.html", user=current_user)
-        assert "Sebastian Caballero" in resp.text and "Sebastian Caballero" in expected
-        assert "Christopher Cordero" in resp.text and "Christopher Cordero" in expected
-        assert "Chelsea Garcia" in resp.text and "Chelsea Garcia" in expected
+        with patch("flaskr.backend.Backend.get_image", return_value = ("test1", "test2")):
+            expected = render_template("about.html", user=current_user)
+            assert "Sebastian Caballero" in resp.text and "Sebastian Caballero" in expected
+            assert "Christopher Cordero" in resp.text and "Christopher Cordero" in expected
+            assert "Chelsea Garcia" in resp.text and "Chelsea Garcia" in expected
 
 ''' Test for the /pages route. We first mock 2 file names, and add them into the list. We mock get_all_page_names from the backend to return said list.
 Then, we verify that when going into the /pages route, the status code is 200, and the filenames that we added should be in resp.data.'''
-def test_pages(client):
+def test_pages(app, client):
     file1 = MagicMock()
     file1.name = "test.txt"
 
@@ -67,7 +68,7 @@ def test_pages(client):
 
 '''Test for the individual page routing (/pages/<page>). We give it a string containing what should be in the page, and then mock the "get_wiki_page"
 backend method to return that string. Then once we do client.get(/pages/Ataxia), we assert that the string is inside that response.'''
-def test_individual_page(client):
+def test_individual_page(app, client):
     file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/Ataxia")
@@ -76,7 +77,7 @@ def test_individual_page(client):
         assert file1 in resp.data.decode("utf-8")
 
 ''' Same as above, with also a test page name'''
-def test_individual_page_routing(client):
+def test_individual_page_routing(app, client):
     file1 = "This is a test file"
     page_name = "test"
 
@@ -101,6 +102,8 @@ def app2():
 def client2(app2):
     app2.test_client_class = FlaskLoginClient
     return app2.test_client(app2.test_client_class)
+
+
 
 ''' This tests the navbar (and at the same time, the home page) changes once a user is logged in.
 We do that by creating a user and passing it to the test client, and by creating the user, .is_authenticated is turned on by default.
@@ -243,10 +246,10 @@ def test_signup_post_username_already_taken(app2, client2):
                                             "submit":"Login"})
             assert resp.text == "That username is already taken." 
 
-''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Invalid characters in username."
-which means that the user entered a username that has invalid characters (" ", "/", ",", etc"). Then, we assert that it takes you to the page where it says 
-"Invalid characters in username."'''
 def test_signup_post_invalid_characters(app2, client2):
+    ''' It tests the POST method of the /signup route (when the form is submitted). For this, we mock the sign_up backend method to return "Invalid characters in username."
+    which means that the user entered a username that has invalid characters (" ", "/", ",", etc"). Then, we assert that it takes you to the page where it says 
+    "Invalid characters in username."'''
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Invalid characters in username."):
             resp = c.post("/signup", data={"csrf_token":"Ignore",
@@ -275,10 +278,31 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert current_user.is_anonymous == True # should be True now, since we are being logged out    
         assert "Welcome to the Wiki!" in resp.text # should be True because we should have been redirected to the home page
 
+
+''' NEW FIXTURES FOR UPLOAD '''
+@pytest.fixture
+def mock_backend():
+    return MagicMock()
+
+@pytest.fixture
+def app3(mock_backend):
+    app3 = create_app({
+        'TESTING': True,
+        'WTF_CSRF_ENABLED':False,
+    }, mock_backend)
+    return app3
+
+@pytest.fixture
+def client3(app3):
+    app3.test_client_class = FlaskLoginClient
+    return app3.test_client(app3.test_client_class)
+
+
+
 ''' Tests the GET method of the /upload route. Makes sure that the user is logged in to upload and it makes sure that it calls the upload.html form for the user to upload their file.'''
-def test_upload_get(app2,client2):
+def test_upload_get(app3,client3):
     user=User("Sebastian")
-    with app2.test_client(user=user) as c:
+    with app3.test_client(user=user) as c:
         assert user.is_anonymous == False
         resp = c.get("/upload")
         assert resp.status_code == 200
@@ -286,12 +310,14 @@ def test_upload_get(app2,client2):
         assert expected == resp.text    
 
 ''' Tests the POST method of the /upload route. Makes sure that the user is logged in to upload and it makes sure that after the user uploads the file, it reroutes back to the Pages page.'''
-def ignore_test_upload_post(app2, client2):
+def test_upload_post(mock_backend, app3, client3):
     user=User("Sebastian")
-    with app2.test_client(user=user) as c:
-        with patch("flaskr.backend.Backend.upload", return_value = "Passed"):
-            resp = c.post("/upload", follow_redirects=True, data=dict(file=(io.BytesIO(b"this is a test"), 'test.txt')))
-            print(resp.text)
-            assert resp.status_code == 200 
-            assert "Pages contained in this Wiki" in resp.text
+    with app3.test_client(user=user) as c:
+        mock_backend.upload.return_value = "Passed"
+        mock_backend.get_all_page_names.return_value = ["test1", "test2"]
+        resp = c.post("/upload", follow_redirects=True, data=dict(file=(io.BytesIO(b"this is a test"), 'test.txt')))
+        mock_backend.upload.assert_called_once() 
+        #print(resp.text)
+        assert resp.status_code == 200 
+        assert "Pages contained in this Wiki" in resp.text
 

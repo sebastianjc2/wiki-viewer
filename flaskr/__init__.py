@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 # The flask terminal command inside "run-flask.sh" searches for
 # this method inside of __init__.py (containing flaskr module 
 # properties) as we set "FLASK_APP=flaskr" before running "flask".
-def create_app(test_config=None):
+def create_app(test_config=None, backend=Backend()):
     # Create and configure the app.
     app = Flask(__name__, instance_relative_config=True)
 
@@ -32,7 +32,7 @@ def create_app(test_config=None):
         # Load the test config if passed in.
         app.config.from_mapping(test_config)
 
-    backend = Backend()
+    # backend = Backend()
     # TODO(Project 1): Make additional modifications here for logging in, backends
     # and additional endpoints.
     login_manager = LoginManager()
