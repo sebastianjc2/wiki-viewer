@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block css_modifications %}
+<link rel='stylesheet' href= "/static/about.css" />
+{% endblock %}
+
 {% block title %}
 About This Wiki
 {% endblock %}
@@ -14,19 +18,19 @@ About This Wiki
 <h3>Your Authors</h3>
 <!-- TODO(Project 1): Add team members and pictures to about page. -->
 <h4>Sebastian Caballero</h4>
-<img src="data:{{sebastian_image_type}};base64,{{sebastian}}" style="width:100px;height:100px">
+<img class="rounded-corners" src="data:{{sebastian_image_type}};base64,{{sebastian}}" style="width:100px;height:100px">
 <br>
 <p2>Software Engineering major at the University of Puerto Rico, Mayaguez</p2>
 <br>
 <br>
 <h4>Chelsea Garcia</h4>
-<img src="data:{{chelsea_image_type}};base64,{{chelsea}}" style="width:100px;height:100px">
+<img class="rounded-corners" src="data:{{chelsea_image_type}};base64,{{chelsea}}" style="width:100px;height:100px">
 <br>
 <p2>Computer Science and Math major at Florida International University</p2>
 <br>
 <br>
 <h4>Christopher Cordero</h4>
-<img src="data:{{chris_image_type}};base64,{{chris}}" style="width:100px;height:100px">
+<img class="rounded-corners" src="data:{{chris_image_type}};base64,{{chris}}" style="width:100px;height:100px">
 <br>
 <p2>Computer Science major at Florida International University</p2>
 
