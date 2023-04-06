@@ -37,7 +37,7 @@ class Backend:
         return blobs
 
     #Takes a file and uploads it to cloud storage if it doesn't already exist.
-    def upload(self, file):
+    def upload(self, file, username):
         #Creates a blob
         blob = self.wiki_content_bucket.blob(file.filename)
         #Checks if it already exists
@@ -47,6 +47,14 @@ class Backend:
         else:
             #Else, upload and then return
             blob.upload_from_file(file)
+            user = self.users_info_bucket.blob(username + '.txt')
+            with user.open("r") as f:
+                data = f.read()
+                info = json.loads(data)
+            with user.open("w") as f:
+                info["pages_authored"].append(file.filename)
+                data = json.dumps(info)
+                f.write(data)
             return "Passed"
 
     #Creates a new user, saved as a txt file with a hashed password inside
@@ -75,7 +83,8 @@ class Backend:
                 user_dict = {
                     "first_name": first_name,
                     "last_name": last_name,
-                    "username": user
+                    "username": user,
+                    "pages_authored":[]
                 }
                 data = json.dumps(user_dict)
                 f.write(data)
