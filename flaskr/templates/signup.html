@@ -5,10 +5,10 @@
     <h2>Sign Up</h2>
     <form method="POST" action="">
         {{ form.hidden_tag() }}
-        {{ form.first_name }}
-        {{ form.last_name }}
-        {{ form.username }}
-        {{ form.password }}
+        {{ form.first_name(placeholder="Enter First Name...") }}
+        {{ form.last_name(placeholder="Enter Last Name...") }}
+        {{ form.username(placeholder="Enter Username...") }}
+        {{ form.password(placeholder="Enter Password...") }}
         {{ form.submit }}
     </form>
 {% endblock %}
