@@ -41,10 +41,10 @@ def test_home_page_while_logged_out(app, client):
 '''It tests that the about page status_code after doing client.get is correct, which means it did GET correctly, and also asserts that our names are in
 the template, as well as in the resp.text'''
 def test_about(app, client):
-    resp = client.get("/about")
-    assert resp.status_code == 200
     with app.app_context():
         with patch("flaskr.backend.Backend.get_image", return_value = ("test1", "test2")):
+            resp = client.get("/about")
+            assert resp.status_code == 200
             expected = render_template("about.html", user=current_user)
             assert "Sebastian Caballero" in resp.text and "Sebastian Caballero" in expected
             assert "Christopher Cordero" in resp.text and "Christopher Cordero" in expected
