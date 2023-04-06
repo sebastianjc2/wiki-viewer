@@ -5,6 +5,8 @@
     <h2>Sign Up</h2>
     <form method="POST" action="">
         {{ form.hidden_tag() }}
+        {{ form.first_name }}
+        {{ form.last_name }}
         {{ form.username }}
         {{ form.password }}
         {{ form.submit }}

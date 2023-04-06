@@ -9,6 +9,7 @@ from flaskr.pages import Upload
 from io import BytesIO
 from PIL import Image
 import base64
+import json
 
 
 
@@ -22,6 +23,7 @@ class Backend:
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
         self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
+        self.users_info_bucket = self.storage_client.bucket("users_profiles")
         
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
@@ -48,7 +50,7 @@ class Backend:
             return "Passed"
 
     #Creates a new user, saved as a txt file with a hashed password inside
-    def sign_up(self, user, password):
+    def sign_up(self, first_name, last_name, user, password):
         # Generated random key with secrets.token_hex()
         secret_key = '5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
         #Checks if these handful of characters (space, comma, backslash, forwardslash)
@@ -57,6 +59,7 @@ class Backend:
         if " " in user or "," in user or "\\" in user or "/" in user:
             return "Invalid characters in username."
         blob = self.users_passwords_bucket.blob(user + '.txt')
+        blob2 = self.users_info_bucket.blob(user + '.txt')
         #Adds 'salt' to the password before hashing to make it so two people with the same
         #password don't have the same hash. The secret key also helps to further obscure the data. 
         with_salt = f"{user}{secret_key}{password}"
@@ -68,6 +71,15 @@ class Backend:
             return "Username is taken."
         #Otherwise, it writes the password to the file.
         else:
+            with blob2.open('w') as f:
+                user_dict = {
+                    "first_name":first_name,
+                    "last_name":last_name,
+                    "username":user
+                }
+                data = json.dumps(user_dict)
+                f.write(data)
+        
             with blob.open('w') as f:
                 f.write(password)
             return "Success"
