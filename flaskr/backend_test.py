@@ -110,7 +110,7 @@ def test_sign_up_invalid():
     mocker = Backend(storage_client)
     #Asserts that with this user containing all of the illegal characters, it will return
     #'Invalid characters in username.' which is what is expected when there are illegal characters
-    assert mocker.sign_up('Invalid user\\ / ,', "testpass") == "Invalid characters in username."
+    assert mocker.sign_up("Bob", "Williams", 'Invalid user\\ / ,', "testpass") == "Invalid characters in username."
     
 #Testing the signup function to make sure it wont allow duplicate usernames/won't overwrite users
 def test_sign_up_taken_user():
@@ -122,7 +122,7 @@ def test_sign_up_taken_user():
     #Setting the .exists return value to true to mock that username being taken
     test_blob.exists.return_value = True
     #Asserts 'Username is taken.', which is the expected return 
-    assert mocker.sign_up('test', 'testpass') == 'Username is taken.'
+    assert mocker.sign_up("Bob", "Williams", 'test', 'testpass') == 'Username is taken.'
     
 #Testing a successful signup
 def test_sign_up_success():
@@ -134,7 +134,7 @@ def test_sign_up_success():
     #Setting the .exists return value to true to mock that username being free
     test_blob.exists.return_value = False
     #Asserts 'Success' for a successful signup
-    assert mocker.sign_up('blah', 'testpass') == 'Success'
+    assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
 
 #Testing a failed sign in for username
 def test_sign_in_username_fail():

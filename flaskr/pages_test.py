@@ -211,6 +211,8 @@ def test_signup_post_redirects_TRUE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
             resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                                "first_name":"Bob",
+                                                "last_name":"Williams",
                                                 "username":"Bob",
                                                 "password":"test1234",
                                                 "submit":"Login"}, follow_redirects=True)                                                
@@ -226,6 +228,8 @@ def test_signup_post_auto_redirects_FALSE(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Success"):
             resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                                "first_name":"Bob",
+                                                "last_name":"Williams",
                                                 "username":"Bob",
                                                 "password":"test1234",
                                                 "submit":"Login"}, follow_redirects=False)
@@ -241,6 +245,8 @@ def test_signup_post_username_already_taken(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Username is taken."):
             resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                            "first_name":"Bob",
+                                            "last_name":"Williams",
                                             "username":"Bob",
                                             "password":"test1234",
                                             "submit":"Login"})
@@ -253,6 +259,8 @@ def test_signup_post_invalid_characters(app2, client2):
     with client2 as c:
         with patch("flaskr.backend.Backend.sign_up", return_value = "Invalid characters in username."):
             resp = c.post("/signup", data={"csrf_token":"Ignore",
+                                            "first_name":"Bob",
+                                            "last_name":"Williams",
                                             "username":"Bob",
                                             "password":"test1234",
                                             "submit":"Login"})
