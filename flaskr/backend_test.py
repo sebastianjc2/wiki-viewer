@@ -102,7 +102,6 @@ def test_upload_pass():
     storage_client = MagicMock()
     user_profile_bucket = MagicMock()
 
-
     # # #Mocking the file class
     file = MagicMock()
     file.filename.return_value("test.txt")
@@ -114,7 +113,6 @@ def test_upload_pass():
     # Setting a return value for blob.exists to false so it will run as if
     # there is no file by the same name, executing normally.
     blob.exists.return_value = False
-
 
     file_mock = MagicMock()
     blob.open = mock_open("Test page :D")
