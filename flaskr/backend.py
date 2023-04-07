@@ -84,7 +84,7 @@ class Backend:
                     "first_name": first_name,
                     "last_name": last_name,
                     "username": user,
-                    "pages_authored":[]
+                    "pages_authored": []
                 }
                 data = json.dumps(user_dict)
                 f.write(data)
