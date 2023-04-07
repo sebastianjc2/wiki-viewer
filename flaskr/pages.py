@@ -46,10 +46,12 @@ def make_endpoints(app, backend):
 
     ''' This will be the Pages page, and our function uses backend.get_all_page_names to get all the page names of the text files included in the content bucket.
     This will get called with /pages in the url and renders the pages.html template'''
-    @app.route("/pages")
+    @app.route("/pages", methods=["POST", "GET"])
     def pages():
         pages = backend.get_all_page_names()
-        return render_template("pages.html", pages = pages, user=current_user)
+        # TODO: if user is logged in, show their list. make an if statement to check if the user is logged in.
+        # user_favs = backend.get_favorites_list()
+        return render_template("pages.html", pages = pages, user = current_user)#, favorites = user_favs)
 
     ''' This function routes to the specific individual wiki pages with band content in them, and it uses backend.get_wiki_page to get all the content from the bucket for this specific wiki page.
     This will get called with /pages/<pagename> in the url and renders the pages_Content.html template'''
@@ -137,3 +139,5 @@ def make_endpoints(app, backend):
                     return "A file by this name already exists."         
                 return redirect(url_for('pages'))       
         return render_template("upload.html", user=current_user)
+
+        

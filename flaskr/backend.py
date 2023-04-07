@@ -22,6 +22,7 @@ class Backend:
         self.wiki_content_bucket = self.storage_client.bucket("wiki-content")
         self.users_passwords_bucket = self.storage_client.bucket("users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
+        self.users_favorites_bucket = self.storage_client.bucket("users_favorites")
         
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
@@ -112,3 +113,8 @@ class Backend:
             img = base64.b64encode(content).decode("utf-8")
             content_type = blob.content_type
         return content_type, img
+
+    def get_favorites_list(self, user):
+        blob = self.users_favorites_bucket.get_blob(user + '.txt')
+        with blob.open("r") as f:
+            return f.read()

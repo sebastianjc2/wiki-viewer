@@ -8,9 +8,62 @@
     <head>
         <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
         <title>pages</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+        <style type = "text/css">
+            .fa-heart-o {
+                color: blue;
+                cursor: pointer;
+            }
+  
+            .fa-heart {
+                color: red;
+                cursor: pointer;
+            }
+        </style>
     </head>
 </head>
 
+<!-- TODO: Need to finish the if statement for when the user is logged in, they have a favorites list and a list with hearts-->
+
+{% if user.is_authenticated %}
+
+<body>
+    <script src = "https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".heart").click(function(){
+            if($(this).hasClass("liked")){
+                $(this).html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
+                $(this).removeClass("liked");
+                
+            }else{
+                $(this).html('<i class="fa fa-heart" aria-hidden="true"></i>');
+                $(this).addClass("liked");
+            }
+            });
+        });
+    </script>
+        <section>             
+            <h1> Favorites List </h1>
+            
+        </section>
+
+        <section>
+            <h1> Pages contained in this Wiki </h1>
+                <ul style = "list-style: none;">
+                    {% for page in pages %}
+                    <li>
+                        <span class= "heart"><i class="fa fa-heart-o" aria-hidden="true" ></i> </span>
+                        <a href="{{ url_for('page', pageName = (page.name| replace('.txt',''))) }}">{{ page.name | replace(".txt","") }}</a>
+                        
+                    </li>
+                    {% endfor %} 
+                </ul>
+        </section> 
+    </div>
+</body>
+
+{% else %}
 <body>
     <!-- TODO(Project 1): Implement routes. -->
     <div>       
@@ -30,5 +83,5 @@
             </ul> 
     </div>
 </body>
-
+{% endif %}
 {% endblock %}
