@@ -174,7 +174,7 @@ def make_endpoints(app, backend):
     def user():
         info = backend.get_user_info(current_user.get_id())
         return render_template("user.html", info=info, user=current_user)
-    
+
     @app.route("/edit_info", methods=["POST", "GET"])
     @login_required
     def edit_user_information():
@@ -185,4 +185,6 @@ def make_endpoints(app, backend):
             backend.update_user_info(current_user.get_id(), bio, dob, location)
             return redirect(url_for('user'))
         info = backend.get_user_info(current_user.get_id())
-        return render_template("edit_user_info.html", info=info, user=current_user)
+        return render_template("edit_user_info.html",
+                               info=info,
+                               user=current_user)

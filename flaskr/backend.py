@@ -86,7 +86,7 @@ class Backend:
                     "username": user,
                     "pages_authored": [],
                     "bio": None,
-                    "DOB": None, 
+                    "DOB": None,
                     "location": None
                 }
                 data = json.dumps(user_dict)
