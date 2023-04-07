@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}User Profile Page{% endblock %}
+
+
+{% block content %}
+
+<h1>{{info["username"]}}'s profile page</h1>
+
+<h2>{{info["first_name"] + " " + info["last_name"]}}</h2>
+
+{% if info["pages_authored"] |length > 0 %}
+    <h4>Pages authored:</h4>
+    <ul>
+        {% for page in info["pages_authored"] %}
+        <li>
+            <p>{{page}}</p>
+        </li>
+    {% endfor%}
+    </ul>
+{% endif %}
+<!-- {% for key, value in info.items() %}
+    {% if key == "username" %}
+        <h1>{{value}}</h1>
+    {% elif key == "first_name" %}
+        <h2>{{value}}</h2>
+    {% elif key == "last_name" %}
+        <h2>{{value}}</h2>
+    {% elif key == "pages_authored" %}
+        <h3>Pages Authored:</h3>
+        {% if value |length != 0 %}
+            {% for page in value %}
+                <li>
+                    <p>{{page}}</p>
+                </li>
+            {% endfor%}
+        {% endif %}
+    {% endif %}
+{% endfor %} -->
+
+{% endblock %}

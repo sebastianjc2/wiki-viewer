@@ -131,3 +131,10 @@ class Backend:
             img = base64.b64encode(content).decode("utf-8")
             content_type = blob.content_type
         return content_type, img
+
+    def get_user_info(self, username):
+        user = self.users_info_bucket.blob(username + '.txt')
+        with user.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info

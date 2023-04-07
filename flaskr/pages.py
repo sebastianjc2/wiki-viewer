@@ -168,3 +168,9 @@ def make_endpoints(app, backend):
                     return "A file by this name already exists."
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
+
+    @app.route("/user", methods=["POST", "GET"])
+    @login_required
+    def user():
+        info = backend.get_user_info(current_user.get_id())
+        return render_template("user.html", info=info, user=current_user)
