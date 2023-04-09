@@ -38,7 +38,7 @@
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
-                        data: {page_name: pageName},
+                        data: {page_name: pageName, post_type: "deletion"},
                         success: function() {
                             $this.html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
                             $this.removeClass("liked");
@@ -48,7 +48,7 @@
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
-                        data: {page_name: pageName},
+                        data: {page_name: pageName, post_type: "addition"},
                         success: function() {
                             $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
                             $this.addClass("liked");

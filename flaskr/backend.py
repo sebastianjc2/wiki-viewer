@@ -118,31 +118,54 @@ class Backend:
         return content_type, img
 
     def get_favorites_list(self, user):
-        username = user.name + '.txt'
-        blob = self.users_favorites_bucket.get_blob(username)
-        with blob.open("r") as f:
-            return f.read()
+        current_contents = []
+        if user.is_authenticated:
+            username = user.name + '.txt'
+            blob = self.users_favorites_bucket.blob(username)
+            try:
+                current_contents = blob.download_as_string().decode('utf-8').split(',')
+            except google.cloud.exceptions.NotFound:
+                pass
+        return current_contents
 
     def favorites_list_adding(self, user, page_name):
         username = user.name + '.txt'
         blob = self.users_favorites_bucket.blob(username)
         
-        current_contents = ""
+        current_contents = []
+
         try:
-            current_contents = blob.download_as_string().decode('utf-8')
+            current_contents = blob.download_as_string().decode('utf-8').split(',')
         except google.cloud.exceptions.NotFound:
             pass
         
-        updated_contents = current_contents + page_name + ","
+        if page_name not in current_contents:
+            current_contents.append(page_name)
+        updated_contents = ','.join(current_contents)
 
         with blob.open('w') as f:
             f.write(updated_contents)
         
         return "Success"
         
-'''
-    def favorites_list_deleting(self, user):
-        blob = self.users_favorites_bucket.get_blob(user + '.txt')
-        with blob.open("r") as f:
-            return f.read()
-            '''
+
+    def favorites_list_deleting(self, user, page_name):
+        username = user.name + '.txt'
+        blob = self.users_favorites_bucket.blob(username)
+        
+        current_contents = []
+
+        try:
+            current_contents = blob.download_as_string().decode('utf-8').split(',')
+        except google.cloud.exceptions.NotFound:
+            pass
+        
+        current_contents.remove(page_name)
+        updated_contents = ','.join(current_contents)
+
+        with blob.open('w') as f:
+            f.write(updated_contents)
+
+        return "Success"
+
+    
