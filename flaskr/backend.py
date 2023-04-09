@@ -5,6 +5,9 @@ from wtforms import StringField, PasswordField, FileField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.utils import secure_filename
 import hashlib
+from google.api_core.exceptions import NotFound
+import google.cloud
+from google.cloud import exceptions
 from flaskr.pages import Upload
 from io import BytesIO
 from PIL import Image
@@ -115,6 +118,31 @@ class Backend:
         return content_type, img
 
     def get_favorites_list(self, user):
+        username = user.name + '.txt'
+        blob = self.users_favorites_bucket.get_blob(username)
+        with blob.open("r") as f:
+            return f.read()
+
+    def favorites_list_adding(self, user, page_name):
+        username = user.name + '.txt'
+        blob = self.users_favorites_bucket.blob(username)
+        
+        current_contents = ""
+        try:
+            current_contents = blob.download_as_string().decode('utf-8')
+        except google.cloud.exceptions.NotFound:
+            pass
+        
+        updated_contents = current_contents + page_name + ","
+
+        with blob.open('w') as f:
+            f.write(updated_contents)
+        
+        return "Success"
+        
+'''
+    def favorites_list_deleting(self, user):
         blob = self.users_favorites_bucket.get_blob(user + '.txt')
         with blob.open("r") as f:
             return f.read()
+            '''
