@@ -146,6 +146,7 @@ class Backend:
         user = self.users_info_bucket.blob(username + '.txt')
         with user.open("r") as f:
             data = f.read()
+            print(data)
             info = json.loads(data)
         with user.open("w") as f:
             info["bio"] = bio
