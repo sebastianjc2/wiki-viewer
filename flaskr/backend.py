@@ -48,31 +48,33 @@ class Backend:
             with blob.open("r") as f:
                 raw = f.read()
                 info = json.loads(raw)
-            #If it does, return without upload
+            #If it does, we check the author
             if info["author"] != username:
-                return "Exists"
-        else:
-            #Else, upload and then return
-            blob.upload_from_file(file_up) 
+                #If the original author isnt the one trying to reupload it, it will return early. 
+                #Otherwise, it will continue.
+                return "Only the original author can reupload their pages."
+        
+        #Else, upload and then return
+        blob.upload_from_file(file_up) 
             
-            with blob.open("r") as f:
-                content = f.readlines()
-            with blob.open("w") as f:
-                modified = []
-                for line in content:
-                    modified.append(line.strip())
-                content_and_author = { "content": modified, "author": username} 
-                f.write(json.dumps(content_and_author, indent=2)) 
+        with blob.open("r") as f:
+            content = f.readlines()
+        with blob.open("w") as f:
+            modified = []
+            for line in content:
+                modified.append(line.strip())
+            content_and_author = { "content": modified, "author": username} 
+            f.write(json.dumps(content_and_author, indent=2)) 
 
-            user = self.users_info_bucket.blob(username + '.txt')
-            with user.open("r") as f:
-                data = f.read()
-                info = json.loads(data)
-            with user.open("w") as f:
-                info["pages_authored"].append(file_up.filename)
-                data = json.dumps(info)
-                f.write(data)
-            return "Passed"
+        user = self.users_info_bucket.blob(username + '.txt')
+        with user.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        with user.open("w") as f:
+            info["pages_authored"].append(file_up.filename)
+            data = json.dumps(info)
+            f.write(data)
+        return "Passed"
 
     #Creates a new user, saved as a txt file with a hashed password inside
     def sign_up(self, first_name, last_name, user, password):
