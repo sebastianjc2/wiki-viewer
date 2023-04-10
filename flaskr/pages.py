@@ -173,6 +173,8 @@ def make_endpoints(app, backend):
     @login_required
     def user():
         info = backend.get_user_info(current_user.get_id())
+        if request.method == "POST":
+            return redirect(url_for('edit_user_information'))
         return render_template("user.html", info=info, user=current_user)
 
     @app.route("/edit_info", methods=["POST", "GET"])

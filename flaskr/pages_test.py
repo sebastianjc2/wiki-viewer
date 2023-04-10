@@ -375,6 +375,148 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert "Welcome to the Wiki!" in resp.text  # should be True because we should have been redirected to the home page
 
 
+def test_user_GET(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.get("/user")
+            assert resp.status_code == 200
+            assert "Sebastian" in resp.text
+            assert "sebastiantest" in resp.text
+            assert "Test" in resp.text
+            assert "Pages Authored" in resp.text
+            assert "test1.txt" in resp.text and "test2.txt" in resp.text
+            assert "Bio" in resp.text and "I Like Rock Music" in resp.text
+            assert not "Date of Birth" in resp.text
+            assert not "Location" in resp.text
+
+
+def test_user_POST_redirects_TRUE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.post("/user", follow_redirects=True)
+            print(resp.text)
+            assert "Write a brief description" in resp.text
+            assert resp.status_code == 200  # Means it already redirected to home
+            # Already redirected because follow_redirects=True
+
+
+def test_user_POST_redirects_FALSE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.post("/user", follow_redirects=False)
+            assert "Redirecting" in resp.text  # currently redirecting because follow_redirects = False
+            assert resp.status_code == 302  # should be 302 because we should be redirecting to edit profile information page
+
+
+def test_edit_user_information_GET(app2, client2):
+    user = User("sebastiantest")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.get("/edit_info")
+            print(resp.text)
+            assert resp.status_code == 200
+            assert "I Like Rock Music" in resp.text
+            assert "Date of Birth" in resp.text
+            assert "Location" in resp.text
+            assert not "Pages Authored" in resp.text
+            assert "Update Profile Information"
+            assert not "Sebastian" in resp.text
+            assert not "Test" in resp.text
+
+
+def test_edit_user_info_POST_redirects_TRUE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            with patch("flaskr.backend.Backend.update_user_info"):
+                resp = c.post("/edit_info",
+                              data={
+                                  "bio": "test",
+                                  "DOB": "None",
+                                  "location": "None"
+                              },
+                              follow_redirects=True)
+                assert resp.status_code == 200  # already redirected to user page
+                assert "Sebastian" in resp.text
+                assert "sebastiantest" in resp.text
+                assert "Test" in resp.text
+                assert "Pages Authored" in resp.text
+                assert "test1.txt" in resp.text and "test2.txt" in resp.text
+
+
+def test_user_POST_redirects_FALSE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            with patch("flaskr.backend.Backend.update_user_info"):
+                resp = c.post("/edit_info",
+                              data={
+                                  "bio": "test",
+                                  "DOB": "None",
+                                  "location": "None"
+                              },
+                              follow_redirects=False)
+                assert "Redirecting" in resp.text  # currently redirecting because follow_redirects = False
+                assert resp.status_code == 302  # should be 302 because we should be redirecting to edit profile information page
+
+
 ''' NEW FIXTURES FOR UPLOAD '''
 
 
