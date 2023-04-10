@@ -52,7 +52,7 @@ def test_about(app, client):
 
 ''' Test for the /pages route. We first mock 2 file names, and add them into the list. We mock get_all_page_names from the backend to return said list.
 Then, we verify that when going into the /pages route, the status code is 200, and the filenames that we added should be in resp.data.'''
-def test_pages(app, client):
+def test_pages_not_logged_in(app, client):
     file1 = MagicMock()
     file1.name = "test.txt"
 
@@ -278,7 +278,25 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert current_user.is_anonymous == True # should be True now, since we are being logged out    
         assert "Welcome to the Wiki!" in resp.text # should be True because we should have been redirected to the home page
 
+def test_pages_logged_in_routing(app2, client2):
+    user=User("Chelsea") 
+    file1 = MagicMock()
+    file1.name = "test.txt"
 
+    file2 = MagicMock()
+    file2.name = "blah.txt"
+
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_all_page_names", return_value=[file1, file2]):
+            resp = c.get("/pages")
+            assert resp.status_code == 200
+            
+            assert b"Favorites List" in resp.data
+            assert b"Pages contained in this Wiki" in resp.data
+            assert b"bla" in resp.data
+            assert b"test" in resp.data
+
+    
 ''' NEW FIXTURES FOR UPLOAD '''
 @pytest.fixture
 def mock_backend():
@@ -320,4 +338,3 @@ def test_upload_post(mock_backend, app3, client3):
         #print(resp.text)
         assert resp.status_code == 200 
         assert "Pages contained in this Wiki" in resp.text
-
