@@ -1,5 +1,5 @@
 from flaskr.backend import Backend
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import base64
 
 
@@ -21,6 +21,9 @@ def mock_open(mock_value):
 
         def read(self):
             return self.text
+
+        def write(self, data):
+            return data
 
     return MockOpen
 
@@ -114,9 +117,7 @@ def test_upload_pass():
     # there is no file by the same name, executing normally.
     blob.exists.return_value = False
 
-    # file_mock = MagicMock()
-    blob.open = mock_open("Test page :D")
-    # file_mock.read.return_value = '{"sdsasd": "blabla"}'
+    blob.open = mock_open("test")
 
     backend = Backend(storage_client)
 
@@ -225,14 +226,22 @@ def test_get_user_info():
     assert mocker.get_user_info("test") == {"test1": "test", "test2": "test"}
 
 
-def test_update_user_info():
+def test_helper_update_user_info():
     ''' Tests the update_user_info function. '''
     # Mocking the storage client, the backend, the bucket and the blobs.
     storage_client = MagicMock()
-    mocker = Backend(storage_client)
-    test_user_info = storage_client.bucket.return_value
-    test_blob = test_user_info.blob.return_value
-
-    test_blob.open = mock_open('{"test1":"test", "test2":"test"}')
-
-    assert True
+    backend = Backend(storage_client)
+    with patch("flaskr.backend.Backend.get_user_info",
+               return_value={
+                   "first_name": "Sebastian",
+                   "last_name": "Test",
+                   "username": "sebastiantest",
+                   "pages_authored": [],
+                   "bio": "test",
+                   "DOB": "test",
+                   "location": "test"
+               }):
+        assert str(
+            backend.helper_update_user_info("sebastiantest", "random bio",
+                                            "2022-01-01", "USA")
+        ) == '{"first_name": "Sebastian", "last_name": "Test", "username": "sebastiantest", "pages_authored": [], "bio": "random bio", "DOB": "2022-01-01", "location": "USA"}'
