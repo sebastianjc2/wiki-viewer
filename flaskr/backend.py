@@ -43,13 +43,14 @@ class Backend:
         #Creates a blob
 
         blob = self.wiki_content_bucket.blob(file_up.filename)
-        with blob.open("r") as f:
-            raw = f.read()
-            info = json.loads(raw)
         #Checks if it already exists
-        if blob.exists(self.storage_client) and info["author"] != username:
+        if blob.exists(self.storage_client):
+            with blob.open("r") as f:
+                raw = f.read()
+                info = json.loads(raw)
             #If it does, return without upload
-            return "Exists"
+            if info["author"] != username:
+                return "Exists"
         else:
             #Else, upload and then return
             blob.upload_from_file(file_up) 

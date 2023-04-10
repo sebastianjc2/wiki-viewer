@@ -28,9 +28,11 @@
     <ul>
         {% for page in info["pages_authored"] %}
         <li>
-            <p>{{page}}</p>
+            <a href="/pages/{{page[:-4]}}">{{page[:-4]}}</a>
+            <input type="button" onclick="document.location='/upload'"" value="Reupload this page"/>
         </li>
     {% endfor%}
+    <br>
     </ul>
 
 {% endif %}
