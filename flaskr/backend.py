@@ -41,9 +41,13 @@ class Backend:
     #Takes a file and uploads it to cloud storage if it doesn't already exist.
     def upload(self, file_up, username):
         #Creates a blob
+
         blob = self.wiki_content_bucket.blob(file_up.filename)
+        with blob.open("r") as f:
+            raw = f.read()
+            info = json.loads(raw)
         #Checks if it already exists
-        if blob.exists(self.storage_client):
+        if blob.exists(self.storage_client) and info["author"] != username:
             #If it does, return without upload
             return "Exists"
         else:
