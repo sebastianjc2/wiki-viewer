@@ -31,7 +31,7 @@ class Backend:
         with blob.open("r") as f:
             raw = f.read()
             info = json.loads(raw)
-            return "\n".join(info["content"])
+            return info["content"]
 
     #Returns a list of all the files uploaded to the wiki-content bucket
     def get_all_page_names(self):
