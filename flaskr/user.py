@@ -1,5 +1,5 @@
 class User:
-    
+
     def __init__(self, username):
         self.name = username
 
@@ -19,4 +19,5 @@ class User:
         try:
             return str(self.name)
         except AttributeError:
-            raise NotImplementedError("No `id` attribute - override `get_id`") from None
+            raise NotImplementedError(
+                "No `id` attribute - override `get_id`") from None
