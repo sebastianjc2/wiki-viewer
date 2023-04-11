@@ -79,7 +79,7 @@ def make_endpoints(app, backend):
                                            post_type=post_type)
 
         #TODO: when you refresh the page, the hearts are unhearted. make sure that when you refresh, the hearts stay hearted.
-        #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List"
+        #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List" (done - chris)
 
         return render_template("pages.html",
                                pages=pages,
