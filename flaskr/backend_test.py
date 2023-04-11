@@ -71,10 +71,15 @@ def test_get_wiki_page():
     test_blob = test_wiki_content_bucket.get_blob.return_value
     #Setting the open value using mock_open so that I can test without accessing
     #an actual file.
-    test_blob.open = mock_open('{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}')
+    test_blob.open = mock_open(
+        '{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}'
+    )
     #Asserting that the return value is the same as the value I set for the mock open
     #Which lets me know it was opened correctly.
-    assert mocker.get_wiki_page('test.txt') == ["Test page :D", "Test page line 2!"]
+    assert mocker.get_wiki_page('test.txt') == [
+        "Test page :D", "Test page line 2!"
+    ]
+
 
 #!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case a file by the same name already exists
@@ -87,16 +92,21 @@ def test_upload_preexisting_fail():
     #Setting the return value for blob.exists to True since this is testing
     #if a file already exists by the same name
     test_blob.exists.return_value = True
-    test_blob.open = mock_open('{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}')    
+    test_blob.open = mock_open(
+        '{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}'
+    )
 
     #Mocking the file class
     file = MagicMock()
     file.filename.return_value("test.txt")
     file.readlines.return_value = "Test page :D\nTest page line 2!"
-    
+
     #Asserting that it returns 'Exists' which is what it should return if
     #it correctly realized there was a preexisting file by the same name
-    assert mocker.upload(file, "not_the_author") == "Only the original author can reupload their pages."
+    assert mocker.upload(
+        file, "not_the_author"
+    ) == "Only the original author can reupload their pages."
+
 
 #!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case a file by the same name already exists
@@ -109,16 +119,19 @@ def test_upload_preexisting_pass():
     #Setting the return value for blob.exists to True since this is testing
     #if a file already exists by the same name
     test_blob.exists.return_value = True
-    test_blob.open = mock_open('{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}')
+    test_blob.open = mock_open(
+        '{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}'
+    )
 
     #Mocking the file class
     file = MagicMock()
     file.filename.return_value("test.txt")
     file.readlines.return_value = "Test page :D\nTest page line 2!"
-    
+
     #Asserting that it returns 'Exists' which is what it should return if
     #it correctly realized there was a preexisting file by the same name
     assert mocker.upload(file, "mock_user") == "Passed"
+
 
 #!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case it uploads without error
@@ -231,5 +244,3 @@ def test_sign_in_password_pass():
     )
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
-
-    
