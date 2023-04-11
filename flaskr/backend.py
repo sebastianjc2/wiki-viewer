@@ -123,7 +123,7 @@ class Backend:
             username = user.name + '.txt'
             blob = self.users_favorites_bucket.blob(username)
             try:
-                current_contents = blob.download_as_string().decode('utf-8').split(',')
+                current_contents = blob.download_as_string().decode('utf-8').rstrip(",").split(',')
             except google.cloud.exceptions.NotFound:
                 pass
         return current_contents
