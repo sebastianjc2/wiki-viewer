@@ -278,7 +278,7 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert current_user.is_anonymous == True # should be True now, since we are being logged out    
         assert "Welcome to the Wiki!" in resp.text # should be True because we should have been redirected to the home page
 
-def test_pages_logged_in_routing(app2, client2):
+def test_pages_logged_in_GET(app2, client2):
     user=User("Chelsea") 
     file1 = MagicMock()
     file1.name = "test.txt"
@@ -288,14 +288,36 @@ def test_pages_logged_in_routing(app2, client2):
 
     with app2.test_client(user=user) as c:
         with patch("flaskr.backend.Backend.get_all_page_names", return_value=[file1, file2]):
-            resp = c.get("/pages")
+            with patch("flaskr.backend.Backend.get_favorites_list", return_value = [file1]):
+                resp = c.get("/pages")
+                print(resp.data)
+                assert resp.status_code == 200                
+                
+                assert b"Favorites List" in resp.data
+                assert b"blah" in resp.data
+                assert b"Pages contained in this Wiki" in resp.data
+                assert b"blah" in resp.data
+                assert b"test" in resp.data
+
+def test_pages_logged_in_POST_TRUE(app2, client2):
+    user=User("Chelsea") 
+    file1 = MagicMock()
+    file1.name = "test.txt"
+
+    file2 = MagicMock()
+    file2.name = "blah.txt"
+
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_all_page_names", return_value=[file1,file2]):
+            resp = c.post("/pages",
+                            data = {"page_name":"test", "post_type":"addition"},
+                            follow_redirects = True)
             assert resp.status_code == 200
             
             assert b"Favorites List" in resp.data
             assert b"Pages contained in this Wiki" in resp.data
-            assert b"bla" in resp.data
+            assert b"blah" in resp.data
             assert b"test" in resp.data
-
     
 ''' NEW FIXTURES FOR UPLOAD '''
 @pytest.fixture

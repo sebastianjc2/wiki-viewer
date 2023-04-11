@@ -55,10 +55,7 @@ def make_endpoints(app, backend):
             page_name = request.form['page_name']
             post_type = request.form['post_type']
 
-            if post_type == "addition":
-                backend.favorites_list_adding(user = current_user, page_name = page_name)
-            elif post_type == "deletion":    
-                backend.favorites_list_deleting(user = current_user, page_name = page_name)
+            backend.favorites_list_editing(user = current_user, page_name = page_name, post_type = post_type)
         
         #TODO: when you refresh the page, the hearts are unhearted. make sure that when you refresh, the hearts stay hearted.
         #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List"

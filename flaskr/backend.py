@@ -128,7 +128,7 @@ class Backend:
                 pass
         return current_contents
 
-    def favorites_list_adding(self, user, page_name):
+    def favorites_list_editing(self, user, page_name, post_type):
         username = user.name + '.txt'
         blob = self.users_favorites_bucket.blob(username)
         
@@ -139,8 +139,12 @@ class Backend:
         except google.cloud.exceptions.NotFound:
             pass
         
-        if page_name not in current_contents:
-            current_contents.append(page_name)
+        if post_type == "addition":
+            if page_name not in current_contents:
+                current_contents.append(page_name)
+        elif post_type == "deletion":
+            current_contents.remove(page_name)
+            
         updated_contents = ','.join(current_contents)
 
         with blob.open('w') as f:
@@ -149,23 +153,5 @@ class Backend:
         return "Success"
         
 
-    def favorites_list_deleting(self, user, page_name):
-        username = user.name + '.txt'
-        blob = self.users_favorites_bucket.blob(username)
-        
-        current_contents = []
-
-        try:
-            current_contents = blob.download_as_string().decode('utf-8').split(',')
-        except google.cloud.exceptions.NotFound:
-            pass
-        
-        current_contents.remove(page_name)
-        updated_contents = ','.join(current_contents)
-
-        with blob.open('w') as f:
-            f.write(updated_contents)
-
-        return "Success"
 
     
