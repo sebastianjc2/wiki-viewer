@@ -402,18 +402,19 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
     with app2.test_client(user=user) as c:
         with patch("flaskr.backend.Backend.get_all_page_names",
                    return_value=[file1, file2]):
-            resp = c.post("/pages",
-                          data={
-                              "page_name": "test",
-                              "post_type": "addition"
-                          },
-                          follow_redirects=True)
-            assert resp.status_code == 200
+            with patch("flaskr.backend.Backend.get_favorites_list", return_value = ["test1", "test-tickles"]):
+                resp = c.post("/pages",
+                            data={
+                                "page_name": "test",
+                                "post_type": "addition"
+                            },
+                            follow_redirects=True)
+                assert resp.status_code == 200
 
-            assert b"Favorites List" in resp.data
-            assert b"Pages contained in this Wiki" in resp.data
-            assert b"blah" in resp.data
-            assert b"test" in resp.data
+                assert b"Favorites List" in resp.data
+                assert b"Pages contained in this Wiki" in resp.data
+                assert b"blah" in resp.data
+                assert b"test" in resp.data
 
 
 ''' NEW FIXTURES FOR UPLOAD '''
