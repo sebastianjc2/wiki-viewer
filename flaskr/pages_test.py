@@ -402,13 +402,14 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
     with app2.test_client(user=user) as c:
         with patch("flaskr.backend.Backend.get_all_page_names",
                    return_value=[file1, file2]):
-            with patch("flaskr.backend.Backend.get_favorites_list", return_value = ["test1", "test-tickles"]):
+            with patch("flaskr.backend.Backend.get_favorites_list",
+                       return_value=["test1", "test-tickles"]):
                 resp = c.post("/pages",
-                            data={
-                                "page_name": "test",
-                                "post_type": "addition"
-                            },
-                            follow_redirects=True)
+                              data={
+                                  "page_name": "test",
+                                  "post_type": "addition"
+                              },
+                              follow_redirects=True)
                 assert resp.status_code == 200
 
                 assert b"Favorites List" in resp.data
