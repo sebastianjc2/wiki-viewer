@@ -2,8 +2,10 @@ from flaskr.backend import Backend
 from unittest.mock import MagicMock
 import base64
 
+
 #Mock open function that is used in later methods that require reading a file
 def mock_open(mock_value):
+
     class MockOpen:
         text = mock_value
         to_write = []
@@ -22,8 +24,11 @@ def mock_open(mock_value):
 
     return MockOpen
 
+
 ''' Tests that get all page names is working by mocking the storage client and mocking the pages.
 Once we call get all page names with the mocker, it should be the same list of pages as the return value we had set'''
+
+
 def test_get_all_page_names():
     storage_client = MagicMock()
     mocker = Backend(storage_client)
@@ -32,7 +37,10 @@ def test_get_all_page_names():
 
     assert mocker.get_all_page_names() == ["test.txt", "bla.txt"]
 
+
 ''' Tests that the image is getting collected, downloaded as bytes, then encoded, decoded correctly '''
+
+
 def test_get_image():
     storage_client = MagicMock()
     image_bucket = MagicMock()
@@ -50,22 +58,24 @@ def test_get_image():
     cont_type, img = backend.get_image("test.jpeg", "about")
 
     bytes_val = base64.b64encode(b"Test").decode("utf-8")
-    
+
     assert img == bytes_val
-    
+
+
 #Tests to see if the get wiki page method returns correctly
 def test_get_wiki_page():
     #Mocking the storage, backend, bucket, and blob
     storage_client = MagicMock()
     mocker = Backend(storage_client)
     test_wiki_content_bucket = storage_client.bucket.return_value
-    test_blob = test_wiki_content_bucket.get_blob.return_value 
+    test_blob = test_wiki_content_bucket.get_blob.return_value
     #Setting the open value using mock_open so that I can test without accessing
     #an actual file.
     test_blob.open = mock_open("Test page :D")
     #Asserting that the return value is the same as the value I set for the mock open
     #Which lets me know it was opened correctly.
     assert mocker.get_wiki_page('test.txt') == "Test page :D"
+
 
 #Tests the upload method in the case a file by the same name already exists
 def test_upload_preexisting():
@@ -81,9 +91,10 @@ def test_upload_preexisting():
     #Mocking the file class
     file = MagicMock()
     file.filename.return_value("test.txt")
-    #Asserting that it returns 'Exists' which is what it should return if 
+    #Asserting that it returns 'Exists' which is what it should return if
     #it correctly realized there was a preexisting file by the same name
     assert mocker.upload(file) == "Exists"
+
 
 #Tests the upload method in the case it uploads without error
 def test_upload_pass():
@@ -102,6 +113,7 @@ def test_upload_pass():
     #run into another file by the same name
     assert mocker.upload(file) == "Passed"
 
+
 #Testing the signup function to make sure it will properly return when invalid
 #characters are present in the user
 def test_sign_up_invalid():
@@ -110,8 +122,10 @@ def test_sign_up_invalid():
     mocker = Backend(storage_client)
     #Asserts that with this user containing all of the illegal characters, it will return
     #'Invalid characters in username.' which is what is expected when there are illegal characters
-    assert mocker.sign_up('Invalid user\\ / ,', "testpass") == "Invalid characters in username."
-    
+    assert mocker.sign_up('Invalid user\\ / ,',
+                          "testpass") == "Invalid characters in username."
+
+
 #Testing the signup function to make sure it wont allow duplicate usernames/won't overwrite users
 def test_sign_up_taken_user():
     #Mocking storage, backend, buckets, and blob
@@ -121,9 +135,10 @@ def test_sign_up_taken_user():
     test_blob = test_user_passwords.blob.return_value
     #Setting the .exists return value to true to mock that username being taken
     test_blob.exists.return_value = True
-    #Asserts 'Username is taken.', which is the expected return 
+    #Asserts 'Username is taken.', which is the expected return
     assert mocker.sign_up('test', 'testpass') == 'Username is taken.'
-    
+
+
 #Testing a successful signup
 def test_sign_up_success():
     #Mocking storage, backend, buckets, and blob
@@ -136,6 +151,7 @@ def test_sign_up_success():
     #Asserts 'Success' for a successful signup
     assert mocker.sign_up('blah', 'testpass') == 'Success'
 
+
 #Testing a failed sign in for username
 def test_sign_in_username_fail():
     #Mocking storage, backend, buckets, and blob
@@ -145,8 +161,9 @@ def test_sign_in_username_fail():
     test_blob = test_user_passwords.blob.return_value
     #Setting the .exists return value to false to mock that username not exists
     test_blob.exists.return_value = False
-    #Asserts that it returns "Username Fail" for a username not existing 
+    #Asserts that it returns "Username Fail" for a username not existing
     assert mocker.sign_in('test', 'testpass') == 'Username Fail'
+
 
 #Testing a failed sign in for password
 def test_sign_in_password_fail():
@@ -157,10 +174,13 @@ def test_sign_in_password_fail():
     test_blob = test_user_passwords.blob.return_value
     #Setting the .exists return value to false to mock that username existing (so it doesnt fail for username)
     test_blob.exists.return_value = True
-    #Setting up a mock open for the hashed password of test using testpass as the actual password    
-    test_blob.open = mock_open("d509c9802230283f6ec7b0ed811d15fa7271a97a37f9f0577c53e37bb68f7f5583858ab968648ec6c268213e7f92fff3db5293fc0e338c8e7973a8c95b9e10aa")
+    #Setting up a mock open for the hashed password of test using testpass as the actual password
+    test_blob.open = mock_open(
+        "d509c9802230283f6ec7b0ed811d15fa7271a97a37f9f0577c53e37bb68f7f5583858ab968648ec6c268213e7f92fff3db5293fc0e338c8e7973a8c95b9e10aa"
+    )
     #Asserts 'Password fail' for using the incorrect password here.
     assert mocker.sign_in('test', 'testpass123') == 'Password fail'
+
 
 def test_sign_in_password_pass():
     #Mocking storage, backend, buckets, and blob
@@ -169,9 +189,10 @@ def test_sign_in_password_pass():
     test_user_passwords = storage_client.bucket.return_value
     test_blob = test_user_passwords.blob.return_value
     #Setting the .exists return value to false to mock that username existing
-    test_blob.exists.return_value = True    
+    test_blob.exists.return_value = True
     #Setting up a mock open for the hashed password of test using testpass as the actual password
-    test_blob.open = mock_open("d509c9802230283f6ec7b0ed811d15fa7271a97a37f9f0577c53e37bb68f7f5583858ab968648ec6c268213e7f92fff3db5293fc0e338c8e7973a8c95b9e10aa")
+    test_blob.open = mock_open(
+        "d509c9802230283f6ec7b0ed811d15fa7271a97a37f9f0577c53e37bb68f7f5583858ab968648ec6c268213e7f92fff3db5293fc0e338c8e7973a8c95b9e10aa"
+    )
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
-
