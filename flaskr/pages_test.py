@@ -491,6 +491,7 @@ def test_edit_user_info_POST_redirects_TRUE(app2, client2):
                 assert "Pages Authored" in resp.text
                 assert "test1.txt" in resp.text and "test2.txt" in resp.text
 
+
 def test_user_POST_redirects_FALSE(app2, client2):
     user = User("Sebastian")
     with app2.test_client(user=user) as c:
