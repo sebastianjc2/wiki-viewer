@@ -42,6 +42,10 @@
                         success: function() {
                             $this.html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
                             $this.removeClass("liked");
+                             // get the id of the current user from Flask's user object
+                            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
+                            favoritePages = favoritePages.filter(function(name) { return name !== pageName; });
+                            localStorage.setItem('favoritePages', JSON.stringify(favoritePages));
                         }
                     });
                 } else {
@@ -52,8 +56,25 @@
                         success: function() {
                             $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
                             $this.addClass("liked");
+                            
+                            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
+                            if (!favoritePages.includes(pageName)) {
+                                favoritePages.push(pageName);
+                            }
+                            localStorage.setItem('favoritePages', JSON.stringify(favoritePages));
                         }
                     });
+                }
+            });
+            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
+
+            // Mark the heart icons of favorite pages as filled
+            $(".heart").each(function() {
+                var $this = $(this);
+                var pageName = $this.data('page-name');
+                if (favoritePages.includes(pageName)) {
+                    $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
+                    $this.addClass("liked");
                 }
             });
         });
@@ -68,7 +89,8 @@
                 <ul style = "list-style: none;">
                     {% for page in pages %}
                     <li>
-                        <span class= "heart" data-page-name = "{{ page.name}}"><i class="fa fa-heart-o" aria-hidden="true" ></i> </span>
+                
+                        <span class= "heart" data-page-name = "{{page.name}}"><i class="fa fa-heart-o" aria-hidden="true"></i> </span>
                         <a href="{{ url_for('page', pageName = (page.name| replace('.txt',''))) }}">{{ page.name | replace(".txt","") }}</a>
                         
                     </li>
