@@ -141,8 +141,7 @@ class Backend:
             pass
 
         if post_type == "addition":
-            if page_name not in current_contents:
-                current_contents.append(page_name)
+            current_contents.append(page_name)
         elif post_type == "deletion":
             current_contents.remove(page_name)
 

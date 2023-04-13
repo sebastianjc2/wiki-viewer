@@ -31,6 +31,9 @@
     <script src = "https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script>
         $(document).ready(function() {
+            var user_fav_page = 'favoritePages'+'{{user.name}}';
+            var favoritePages = JSON.parse(localStorage.getItem(user_fav_page)) || [];
+
             $(".heart").click(function() {
                 var $this = $(this);
                 var pageName = $this.data('page-name');
@@ -41,11 +44,9 @@
                         data: {page_name: pageName, post_type: "deletion"},
                         success: function() {
                             $this.html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
-                            $this.removeClass("liked");
-                             // get the id of the current user from Flask's user object
-                            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
+                            $this.removeClass("liked");                          
                             favoritePages = favoritePages.filter(function(name) { return name !== pageName; });
-                            localStorage.setItem('favoritePages', JSON.stringify(favoritePages));
+                            localStorage.setItem(user_fav_page, JSON.stringify(favoritePages));
                         }
                     });
                 } else {
@@ -56,17 +57,15 @@
                         success: function() {
                             $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
                             $this.addClass("liked");
-                            
-                            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
+    
                             if (!favoritePages.includes(pageName)) {
                                 favoritePages.push(pageName);
                             }
-                            localStorage.setItem('favoritePages', JSON.stringify(favoritePages));
+                            localStorage.setItem(user_fav_page, JSON.stringify(favoritePages));
                         }
                     });
                 }
             });
-            var favoritePages = JSON.parse(localStorage.getItem('favoritePages')) || [];
 
             // Mark the heart icons of favorite pages as filled
             $(".heart").each(function() {
@@ -108,9 +107,6 @@
          <h1> Pages contained in this Wiki </h1>
             <ul>
                 {% for page in pages %}
-                
-                <!-- for this for loop approach to work, backend.get_all_page_names() needs to
-                be an iterable or a list so that it can make a url for each page-->
                 <li>
                     <a href="{{ url_for('page', pageName = (page.name| replace('.txt',''))) }}">{{ page.name | replace(".txt","") }}</a>
                     
