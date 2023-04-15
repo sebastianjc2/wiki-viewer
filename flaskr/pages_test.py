@@ -147,17 +147,18 @@ def test_user_GET(app2, client2):
     with app2.test_client(user=user) as c:
         with patch("flaskr.backend.Backend.get_user_info",
                    return_value={
-                       "username": "sebastiantest",
+                       "username": "swiki",
                        "first_name": "Sebastian",
                        "last_name": "Test",
                        "pages_authored": ["test1.txt", "test2.txt"],
                    }):
             resp = c.get("/user")
+            print(resp.text)
             assert resp.status_code == 200
             assert "Sebastian" in resp.text
-            assert "sebastiantest" in resp.text
+            assert "swiki" in resp.text
             assert "Test" in resp.text
-            assert "Pages Authored" in resp.text
+            assert "Pages authored" in resp.text
             assert "test1.txt" in resp.text and "test2.txt" in resp.text
 
 
