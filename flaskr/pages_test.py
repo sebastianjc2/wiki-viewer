@@ -96,7 +96,6 @@ def test_individual_page_pizza(app, client):
         assert file1[0] in resp.data.decode("utf-8")
 
 
-
 ''' Same as above, with also a test page name'''
 
 

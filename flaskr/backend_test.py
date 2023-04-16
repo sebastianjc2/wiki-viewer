@@ -163,7 +163,6 @@ def test_upload_pass():
     assert backend.upload(file, "test") == "Passed"
 
 
-
 #Testing the signup function to make sure it will properly return when invalid
 #characters are present in the user
 def test_sign_up_invalid():
@@ -217,7 +216,6 @@ def test_sign_up_two_different_buckets():
     assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
     test_blob_profile.open.assert_called_with("w")
     test_blob_pw.open.assert_called_with("w")
-
 
 
 #Testing a failed sign in for username
