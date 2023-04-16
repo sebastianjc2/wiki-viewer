@@ -99,7 +99,6 @@ def test_individual_page_pizza(app, client):
 ''' Same as above, with also a test page name'''
 
 
-#Fix this for real later!!!
 def test_individual_page_routing(app, client):
     file1 = ["This is a test file"]
     page_name = "test"

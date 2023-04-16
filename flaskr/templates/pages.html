@@ -75,8 +75,18 @@
         });
     </script>
         <section>             
-            <h1> Favorites List </h1>
-            
+            {% if favorites | length > 0 %}
+            <h4>Favorites List</h4>
+            <ul style = "list-style: none;">
+                {% for fav in favorites %}
+                <li>
+                <span class= "heart" data-page-name = "{{ fav.name}}"><i class="fa fa-heart" aria-hidden="true" ></i> </span>
+                <a href="/pages/{{fav[:-4]}}">{{fav[:-4]}}</a>
+                </li>
+        {% endfor%}
+        </ul>
+        <br>
+    {% endif %}
         </section>
 
         <section>
