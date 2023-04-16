@@ -165,7 +165,7 @@ def make_endpoints(app, backend):
             if file and allowed_file(file.filename):
                 upload_outcome = backend.upload(file, current_user.get_id())
                 if upload_outcome == "Exists":
-                    return "A file by this name already exists."
+                    return "Only the original author can reupload their pages."
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
 

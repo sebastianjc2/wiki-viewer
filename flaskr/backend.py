@@ -51,7 +51,7 @@ class Backend:
             if info["author"] != username:
                 #If the original author isnt the one trying to reupload it, it will return early.
                 #Otherwise, it will continue.
-                return "Only the original author can reupload their pages."
+                return "Exists"
             else:
                 blob.upload_from_file(file_up)
                 with blob.open("r") as f:

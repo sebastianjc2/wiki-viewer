@@ -108,7 +108,7 @@ def test_upload_preexisting_fail():
     #it correctly realized there was a preexisting file by the same name
     assert mocker.upload(
         file, "not_the_author"
-    ) == "Only the original author can reupload their pages."
+    ) == "Exists"
 
 
 #!!!RECOMMENT THIS CODE WAS CHANGED!!!
