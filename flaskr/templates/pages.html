@@ -6,7 +6,6 @@
 <html> -->
 <head>
     <head>
-        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
         <title>pages</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
         <style type = "text/css">
@@ -23,7 +22,6 @@
     </head>
 </head>
 
-<!-- TODO: Need to finish the if statement for when the user is logged in, they have a favorites list and a list with hearts-->
 
 {% if user.is_authenticated %}
 
@@ -31,33 +29,32 @@
     <script src = "https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            var user_fav_page = 'favoritePages'+'{{user.name}}';
+            var user_fav_page = 'favoritePages'+'{{ user.name }}';
             var favoritePages = JSON.parse(localStorage.getItem(user_fav_page)) || [];
 
             $(".heart").click(function() {
                 var $this = $(this);
                 var pageName = $this.data('page-name');
                 if ($this.hasClass("liked")) {
+                    $this.html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
+                    $this.removeClass("liked"); 
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
                         data: {page_name: pageName, post_type: "deletion"},
-                        success: function() {
-                            $this.html('<i class="fa fa-heart-o" aria-hidden="true"></i>');
-                            $this.removeClass("liked");                          
+                        success: function() {                         
                             favoritePages = favoritePages.filter(function(name) { return name !== pageName; });
                             localStorage.setItem(user_fav_page, JSON.stringify(favoritePages));
                         }
                     });
                 } else {
+                    $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
+                    $this.addClass("liked");
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
                         data: {page_name: pageName, post_type: "addition"},
                         success: function() {
-                            $this.html('<i class="fa fa-heart" aria-hidden="true"></i>');
-                            $this.addClass("liked");
-    
                             if (!favoritePages.includes(pageName)) {
                                 favoritePages.push(pageName);
                             }
@@ -67,7 +64,6 @@
                 }
             });
 
-            // Mark the heart icons of favorite pages as filled
             $(".heart").each(function() {
                 var $this = $(this);
                 var pageName = $this.data('page-name');
@@ -89,7 +85,7 @@
                     {% for page in pages %}
                     <li>
                 
-                        <span class= "heart" data-page-name = "{{page.name}}"><i class="fa fa-heart-o" aria-hidden="true"></i> </span>
+                        <span class= "heart" data-page-name = "{{ page.name }}"><i class="fa fa-heart-o" aria-hidden="true"></i> </span>
                         <a href="{{ url_for('page', pageName = (page.name| replace('.txt',''))) }}">{{ page.name | replace(".txt","") }}</a>
                         
                     </li>
@@ -101,9 +97,7 @@
 
 {% else %}
 <body>
-    <!-- TODO(Project 1): Implement routes. -->
     <div>       
-        <!-- TODO: implement something that puts every single url onto the Pages page.-->
          <h1> Pages contained in this Wiki </h1>
             <ul>
                 {% for page in pages %}
@@ -111,7 +105,6 @@
                     <a href="{{ url_for('page', pageName = (page.name| replace('.txt',''))) }}">{{ page.name | replace(".txt","") }}</a>
                     
                 </li>
-                <!-- there is a possibility that we should be using backend.get_wiki_page() to do this instead-->
                 {% endfor %} 
             </ul> 
     </div>

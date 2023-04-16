@@ -116,6 +116,28 @@ class Backend:
             content_type = blob.content_type
         return content_type, img
 
+    '''
+    def get_favorites_list(self, username):
+        pass
+
+    def add_favorite(self, page_name):
+        #Creates a blob
+        blob = self.wiki_content_bucket.blob(file_up.filename)
+        #Checks if it already exists
+        if blob.exists(self.storage_client):
+            with blob.open("r") as f:
+                raw = f.read()
+                info = json.loads(raw)
+
+        with user.open("w") as f:
+                info["favorites"].append(page_name)
+                data = json.dumps(info)
+                f.write(data)
+
+
+    def remove_favorite():
+    '''
+    
     def get_favorites_list(self, user):
         current_contents = []
         if user.is_authenticated:
@@ -127,7 +149,8 @@ class Backend:
             except google.cloud.exceptions.NotFound:
                 pass
         return current_contents
-
+        
+    
     def favorites_list_editing(self, user, page_name, post_type):
         username = user.name + '.txt'
         blob = self.users_favorites_bucket.blob(username)
@@ -151,3 +174,5 @@ class Backend:
             f.write(updated_contents)
 
         return "Success"
+    '''
+

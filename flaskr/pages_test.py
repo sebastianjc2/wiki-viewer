@@ -385,7 +385,6 @@ def test_pages_logged_in_GET(app2, client2):
                 assert resp.status_code == 200
 
                 assert b"Favorites List" in resp.data
-                assert b"blah" in resp.data
                 assert b"Pages contained in this Wiki" in resp.data
                 assert b"blah" in resp.data
                 assert b"test" in resp.data

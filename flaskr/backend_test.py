@@ -1,5 +1,6 @@
 from flaskr.backend import Backend
 from unittest.mock import MagicMock
+from flaskr.user import User
 import base64
 
 
@@ -196,3 +197,28 @@ def test_sign_in_password_pass():
     )
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
+
+def test_get_favorites_list():
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user = User("test")
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    test_blob.open = mock_open('test1,test2')
+    test_blob.download_as_string.return_value.decode.return_value = 'test1,test2'
+    assert mocker.get_favorites_list(test_user) == ['test1', 'test2']
+
+'''
+def test_get_favorites_list():
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user = User("test")
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    # using mock open to mock the user.open("r") as f command
+    test_blob.open = mock_open('test1,test2')
+
+    assert mocker.get_favorites_list(test_user) == {'test1,test2'} 
+'''   
