@@ -29,7 +29,9 @@ class Backend:
     def get_wiki_page(self, pageName):
         blob = self.wiki_content_bucket.get_blob(pageName)
         with blob.open("r") as f:
-            return f.read()
+            raw = f.read()
+            info = json.loads(raw)
+            return info["content"]
 
     #Returns a list of all the files uploaded to the wiki-content bucket
     def get_all_page_names(self):
@@ -37,22 +39,52 @@ class Backend:
         return blobs
 
     #Takes a file and uploads it to cloud storage if it doesn't already exist.
-    def upload(self, file, username):
+    def upload(self, file_up, username):
         #Creates a blob
-        blob = self.wiki_content_bucket.blob(file.filename)
+        blob = self.wiki_content_bucket.blob(file_up.filename)
         #Checks if it already exists
         if blob.exists(self.storage_client):
-            #If it does, return without upload
-            return "Exists"
+            with blob.open("r") as f:
+                raw = f.read()
+                info = json.loads(raw)
+            #If it does, we check the author
+            if info["author"] != username:
+                #If the original author isnt the one trying to reupload it, it will return early.
+                #Otherwise, it will continue.
+                return "Only the original author can reupload their pages."
+            else:
+                blob.upload_from_file(file_up)
+                with blob.open("r") as f:
+                    content = f.readlines()
+                with blob.open("w") as f:
+                    modified = []
+                    for line in content:
+                        modified.append(line.strip())
+                    content_and_author = {
+                        "content": modified,
+                        "author": username
+                    }
+                    f.write(json.dumps(content_and_author, indent=2))
+                return "Passed"
         else:
             #Else, upload and then return
-            blob.upload_from_file(file)
+            blob.upload_from_file(file_up)
+
+            with blob.open("r") as f:
+                content = f.readlines()
+            with blob.open("w") as f:
+                modified = []
+                for line in content:
+                    modified.append(line.strip())
+                content_and_author = {"content": modified, "author": username}
+                f.write(json.dumps(content_and_author, indent=2))
+
             user = self.users_info_bucket.blob(username + '.txt')
             with user.open("r") as f:
                 data = f.read()
                 info = json.loads(data)
             with user.open("w") as f:
-                info["pages_authored"].append(file.filename)
+                info["pages_authored"].append(file_up.filename)
                 data = json.dumps(info)
                 f.write(data)
             return "Passed"

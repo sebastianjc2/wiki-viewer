@@ -84,27 +84,31 @@ def test_pages(app, client):
 backend method to return that string. Then once we do client.get(/pages/Ataxia), we assert that the string is inside that response.'''
 
 
-def test_individual_page(app, client):
-    file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
+#Fix this for real later!!!
+def test_individual_page_pizza(app, client):
+    file1 = [
+        "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
+    ]
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/Ataxia")
         assert resp.status_code == 200
         print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
+        assert file1[0] in resp.data.decode("utf-8")
 
 
 ''' Same as above, with also a test page name'''
 
 
+#Fix this for real later!!!
 def test_individual_page_routing(app, client):
-    file1 = "This is a test file"
+    file1 = ["This is a test file"]
     page_name = "test"
 
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/<page_name>")
         assert resp.status_code == 200
         print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
+        assert file1[0] in resp.data.decode("utf-8")
 
 
 ''' NEW FIXTURES FOR LOGIN RELATED TESTS'''

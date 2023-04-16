@@ -3,5 +3,8 @@
 
 {% block content %}
     <h1>{{page_name}}</h1>
-        <p1>{{content}}</p1>
+    {% for line in content %}
+        <p1>{{line}}</p1>
+        <br>
+    {% endfor %}
 {% endblock %}
