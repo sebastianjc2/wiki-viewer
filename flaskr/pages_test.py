@@ -470,6 +470,7 @@ def test_user_POST_redirects_TRUE(app2, client2):
             assert resp.status_code == 200  # Means it already redirected to home
             # Already redirected because follow_redirects=True
 
+
 def test_edit_user_information_GET(app2, client2):
     user = User("sebastiantest")
     with app2.test_client(user=user) as c:
@@ -589,10 +590,17 @@ def test_upload_get(app3, client3):
 
 
 def test_upload_post(mock_backend, app3, client3):
+
+    file1 = MagicMock()
+    file1.name = "test1.txt"
+
+    file2 = MagicMock()
+    file2.name = "test2.txt"
+
     user = User("Sebastian")
     with app3.test_client(user=user) as c:
         mock_backend.upload.return_value = "Passed"
-        mock_backend.get_all_page_names.return_value = ["test1", "test2"]
+        mock_backend.get_all_page_names.return_value = [file1, file2]
         resp = c.post("/upload",
                       follow_redirects=True,
                       data=dict(file=(io.BytesIO(b"this is a test"),
