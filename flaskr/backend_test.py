@@ -169,7 +169,6 @@ def test_sign_up_two_different_buckets():
     test_blob_pw.open.assert_called_with("w")
 
 
-
 #Testing a failed sign in for username
 def test_sign_in_username_fail():
     #Mocking storage, backend, buckets, and blob
