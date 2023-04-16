@@ -139,45 +139,6 @@ class Backend:
             content_type = blob.content_type
         return content_type, img
 
-    '''
-    def get_favorites_list(self, user):
-        current_contents = []
-        if user.is_authenticated:
-            username = user.name + '.txt'
-            blob = self.users_favorites_bucket.blob(username)
-            try:
-                current_contents = blob.download_as_string().decode(
-                    'utf-8').split(',')
-            except google.cloud.exceptions.NotFound:
-                pass
-        return current_contents
-        
-    
-    def favorites_list_editing(self, user, page_name, post_type):
-        username = user.name + '.txt'
-        blob = self.users_favorites_bucket.blob(username)
-
-        current_contents = []
-
-        try:
-            current_contents = blob.download_as_string().decode('utf-8').split(
-                ',')
-        except google.cloud.exceptions.NotFound:
-            pass
-
-        if post_type == "addition":
-            current_contents.append(page_name)
-        elif post_type == "deletion":
-            current_contents.remove(page_name)
-
-        updated_contents = ','.join(current_contents)
-
-        with blob.open('w') as f:
-            f.write(updated_contents)
-
-        return "Success"
-    '''
-
     def get_user_info(self, username):
         user = self.users_info_bucket.blob(username + '.txt')
         with user.open("r") as f:
