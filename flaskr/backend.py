@@ -11,7 +11,6 @@ from PIL import Image
 import base64
 import json
 
-
 class Backend:
 
     #Initializing the storage client and the buckets, uses an automatic assignment
