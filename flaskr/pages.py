@@ -71,26 +71,28 @@ def make_endpoints(app, backend):
     @app.route("/pages", methods=["POST", "GET"])
     def pages():
         pages = backend.get_all_page_names()
-        user_favs = backend.get_favorites_list(user=current_user)
+        if current_user.is_authenticated:
+            user_favs = backend.get_favorites_list(user=current_user)
 
         if request.method == 'POST':
             page_name = request.form['page_name']
             edit_type = request.form['edit_type']
 
             if edit_type == "add":
-                backend.add_favorite(user=current_user,
-                                                page_name=page_name)
+                backend.add_favorite(user=current_user, page_name=page_name)
             elif edit_type == "remove":
-                backend.remove_favorite(user=current_user,
-                                                page_name=page_name)                
+                backend.remove_favorite(user=current_user, page_name=page_name)
 
         #TODO: when you refresh the page, the hearts are unhearted. make sure that when you refresh, the hearts stay hearted.
         #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List"
 
-        return render_template("pages.html",
-                               pages=pages,
-                               user=current_user,
-                               favorites=user_favs)
+        if current_user.is_authenticated:
+            return render_template("pages.html",
+                                   pages=pages,
+                                   user=current_user,
+                                   favorites=user_favs)
+        else:
+            return render_template("pages.html", pages=pages, user=current_user)
 
     ''' This function routes to the specific individual wiki pages with band content in them, and it uses backend.get_wiki_page to get all the content from the bucket for this specific wiki page.
     This will get called with /pages/<pagename> in the url and renders the pages_Content.html template'''

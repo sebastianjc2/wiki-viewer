@@ -100,7 +100,6 @@ def test_upload_preexisting():
     assert mocker.upload(file, "test") == "Exists"
 
 
-
 #Tests the upload method in the case it uploads without error
 def test_upload_pass():
     #Mocking the storage, bucket
@@ -126,7 +125,6 @@ def test_upload_pass():
     # Asserting that it returns 'Passed' which is what it should return if it doesn't
     # run into another file by the same name
     assert backend.upload(file, "test") == "Passed"
-
 
 
 #Testing the signup function to make sure it will properly return when invalid
@@ -184,7 +182,6 @@ def test_sign_up_two_different_buckets():
     test_blob_pw.open.assert_called_with("w")
 
 
-
 #Testing a failed sign in for username
 def test_sign_in_username_fail():
     #Mocking storage, backend, buckets, and blob
@@ -230,6 +227,7 @@ def test_sign_in_password_pass():
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
 
+
 '''
 def test_get_favorites_list():
     storage_client = MagicMock()
@@ -242,6 +240,7 @@ def test_get_favorites_list():
     test_blob.download_as_string.return_value.decode.return_value = 'test1,test2'
     assert mocker.get_favorites_list(test_user) == ['test1', 'test2']
 '''
+
 
 def test_get_user_info():
     '''Tests the get_user_info function by making sure that it returns the expected info
@@ -278,6 +277,7 @@ def test_helper_update_user_info():
                                             "2022-01-01", "USA")
         ) == '{"first_name": "Sebastian", "last_name": "Test", "username": "sebastiantest", "pages_authored": [], "bio": "random bio", "DOB": "2022-01-01", "location": "USA"}'
 
+
 def test_get_favorites_list():
     storage_client = MagicMock()
     mocker = Backend(storage_client)
@@ -285,45 +285,47 @@ def test_get_favorites_list():
     test_blob = test_user_info.blob.return_value
 
     # using mock open to mock the user.open("r") as f command
-    test_blob.open = mock_open('{"test1":"test", "test2":"test", "favorites":["favorite1"]}')
+    test_blob.open = mock_open(
+        '{"test1":"test", "test2":"test", "favorites":["favorite1"]}')
+    user = User("usertest")
+    assert mocker.get_favorites_list(user) == ["favorite1"]
 
-    assert mocker.get_favorites_list("test") == ["favorite1"]
 
 def test_helper_update_favorites_list_add():
     storage_client = MagicMock()
     backend = Backend(storage_client)
+    user = User("usertest")
     with patch("flaskr.backend.Backend.get_user_info",
                return_value={
                    "first_name": "userfirst",
                    "last_name": "userlast",
                    "username": "usertest",
                    "pages_authored": [],
-                   "favorites" : [],
+                   "favorites": [],
                    "bio": "test",
                    "DOB": "test",
                    "location": "test"
                }):
         assert str(
-            backend.helper_update_favorites_list("usertest", "pagetest",
-                                            "add")
+            backend.helper_update_favorites_list(user, "pagetest", "add")
         ) == '{"first_name": "userfirst", "last_name": "userlast", "username": "usertest", "pages_authored": [], "favorites": ["pagetest"], "bio": "test", "DOB": "test", "location": "test"}'
+
 
 def test_helper_update_favorites_list_remove():
     storage_client = MagicMock()
     backend = Backend(storage_client)
+    user = User("usertest")
     with patch("flaskr.backend.Backend.get_user_info",
                return_value={
                    "first_name": "userfirst",
                    "last_name": "userlast",
                    "username": "usertest",
                    "pages_authored": [],
-                   "favorites" : ["favorite1"],
+                   "favorites": ["favorite1"],
                    "bio": "test",
                    "DOB": "test",
                    "location": "test"
                }):
         assert str(
-            backend.helper_update_favorites_list("usertest", "pagetest",
-                                            "remove")
+            backend.helper_update_favorites_list(user, "favorite1", "remove")
         ) == '{"first_name": "userfirst", "last_name": "userlast", "username": "usertest", "pages_authored": [], "favorites": [], "bio": "test", "DOB": "test", "location": "test"}'
-

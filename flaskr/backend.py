@@ -14,6 +14,7 @@ from PIL import Image
 import base64
 import json
 
+
 class Backend:
 
     #Initializing the storage client and the buckets, uses an automatic assignment
@@ -26,7 +27,6 @@ class Backend:
             "users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
         self.users_info_bucket = self.storage_client.bucket("users_profiles")
-
 
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
@@ -88,7 +88,7 @@ class Backend:
                     "last_name": last_name,
                     "username": user,
                     "pages_authored": [],
-                    "favorites" : [],
+                    "favorites": [],
                     "bio": None,
                     "DOB": None,
                     "location": None
@@ -203,7 +203,6 @@ class Backend:
             f.write(data)
         return
 
-    
     def get_favorites_list(self, user):
         user_blob = self.users_info_bucket.blob(user.name + '.txt')
         with user_blob.open("r") as f:
@@ -218,10 +217,9 @@ class Backend:
             info['favorites'].append(page_name)
         elif edit_type == "remove":
             info['favorites'].remove(page_name)
-        
+
         data = json.dumps(info)
         return data
-
 
     def add_favorite(self, user, page_name):
         user_blob = self.users_info_bucket.blob(user.name + '.txt')

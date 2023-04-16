@@ -64,11 +64,7 @@ def test_about(app, client):
 Then, we verify that when going into the /pages route, the status code is 200, and the filenames that we added should be in resp.data.'''
 
 
-<<<<<<< HEAD
 def test_pages_not_logged_in(app, client):
-=======
-def test_pages(app, client):
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
     file1 = MagicMock()
     file1.name = "test.txt"
 
@@ -276,11 +272,8 @@ def test_signup_post_redirects_TRUE(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
-<<<<<<< HEAD
-=======
                               "first_name": "Bob",
                               "last_name": "Williams",
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -303,11 +296,8 @@ def test_signup_post_auto_redirects_FALSE(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
-<<<<<<< HEAD
-=======
                               "first_name": "Bob",
                               "last_name": "Williams",
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -331,11 +321,8 @@ def test_signup_post_username_already_taken(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
-<<<<<<< HEAD
-=======
                               "first_name": "Bob",
                               "last_name": "Williams",
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -353,11 +340,8 @@ def test_signup_post_invalid_characters(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
-<<<<<<< HEAD
-=======
                               "first_name": "Bob",
                               "last_name": "Williams",
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -391,7 +375,6 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert "Welcome to the Wiki!" in resp.text  # should be True because we should have been redirected to the home page
 
 
-<<<<<<< HEAD
 def test_pages_logged_in_GET(app2, client2):
     user = User("Chelsea")
     file1 = MagicMock()
@@ -428,12 +411,11 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
                    return_value=[file1, file2]):
             with patch("flaskr.backend.Backend.get_favorites_list",
                        return_value=["test1", "test2"]):
-                with patch("flaskr.backend.Backend.favorites_list_editing",
-                           return_value="Success"):
+                with patch("flaskr.backend.Backend.add_favorite"):
                     resp = c.post("/pages",
                                   data={
                                       "page_name": "test",
-                                      "post_type": "addition"
+                                      "edit_type": "add"
                                   },
                                   follow_redirects=True)
                     assert resp.status_code == 200
@@ -442,7 +424,8 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
                     assert b"Pages contained in this Wiki" in resp.data
                     assert b"blah" in resp.data
                     assert b"test" in resp.data
-=======
+
+
 def test_user_GET(app2, client2):
     user = User("Sebastian")
     with app2.test_client(user=user) as c:
@@ -583,7 +566,6 @@ def test_user_POST_redirects_FALSE(app2, client2):
                               follow_redirects=False)
                 assert "Redirecting" in resp.text  # currently redirecting because follow_redirects = False
                 assert resp.status_code == 302  # should be 302 because we should be redirecting to edit profile information page
->>>>>>> 0d64f472e43c4c9a151df020045b4e900aa27383
 
 
 ''' NEW FIXTURES FOR UPLOAD '''
