@@ -142,6 +142,26 @@ def test_navbar_and_home_page_change_when_logged_in(app2, client2):
         assert expected == resp.text
 
 
+def test_user_GET(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "swiki",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                   }):
+            resp = c.get("/user")
+            print(resp.text)
+            assert resp.status_code == 200
+            assert "Sebastian" in resp.text
+            assert "swiki" in resp.text
+            assert "Test" in resp.text
+            assert "Pages authored" in resp.text
+            assert "test1.txt" in resp.text and "test2.txt" in resp.text
+
+
 ''' It tests that the response is correctly GETting the login template (when the /login route is called)'''
 
 
