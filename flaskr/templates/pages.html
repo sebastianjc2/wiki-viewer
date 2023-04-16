@@ -41,7 +41,7 @@
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
-                        data: {page_name: pageName, post_type: "deletion"},
+                        data: {page_name: pageName, edit_type: "remove"},
                         success: function() {                         
                             favoritePages = favoritePages.filter(function(name) { return name !== pageName; });
                             localStorage.setItem(user_fav_page, JSON.stringify(favoritePages));
@@ -53,7 +53,7 @@
                     $.ajax({
                         url: '/pages',
                         type: 'POST',
-                        data: {page_name: pageName, post_type: "addition"},
+                        data: {page_name: pageName, edit_type: "add"},
                         success: function() {
                             if (!favoritePages.includes(pageName)) {
                                 favoritePages.push(pageName);

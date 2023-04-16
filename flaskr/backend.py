@@ -25,8 +25,8 @@ class Backend:
         self.users_passwords_bucket = self.storage_client.bucket(
             "users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
-        self.users_favorites_bucket = self.storage_client.bucket(
-            "users_favorites")
+        self.users_info_bucket = self.storage_client.bucket("users_profiles")
+
 
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
@@ -88,6 +88,7 @@ class Backend:
                     "last_name": last_name,
                     "username": user,
                     "pages_authored": [],
+                    "favorites" : [],
                     "bio": None,
                     "DOB": None,
                     "location": None
@@ -139,27 +140,6 @@ class Backend:
         return content_type, img
 
     '''
-    def get_favorites_list(self, username):
-        pass
-
-    def add_favorite(self, page_name):
-        #Creates a blob
-        blob = self.wiki_content_bucket.blob(file_up.filename)
-        #Checks if it already exists
-        if blob.exists(self.storage_client):
-            with blob.open("r") as f:
-                raw = f.read()
-                info = json.loads(raw)
-
-        with user.open("w") as f:
-                info["favorites"].append(page_name)
-                data = json.dumps(info)
-                f.write(data)
-
-
-    def remove_favorite():
-    '''
-    
     def get_favorites_list(self, user):
         current_contents = []
         if user.is_authenticated:
@@ -220,5 +200,39 @@ class Backend:
         user = self.users_info_bucket.blob(username + '.txt')
         data = self.helper_update_user_info(username, bio, dob, location)
         with user.open("w") as f:
+            f.write(data)
+        return
+
+    
+    def get_favorites_list(self, user):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        with user_blob.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info['favorites']
+
+    def helper_update_favorites_list(self, user, page_name, edit_type):
+        info = self.get_user_info(user.name)
+
+        if edit_type == "add":
+            info['favorites'].append(page_name)
+        elif edit_type == "remove":
+            info['favorites'].remove(page_name)
+        
+        data = json.dumps(info)
+        return data
+
+
+    def add_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'add')
+        with user_blob.open("w") as f:
+            f.write(data)
+        return
+
+    def remove_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'remove')
+        with user_blob.open("w") as f:
             f.write(data)
         return
