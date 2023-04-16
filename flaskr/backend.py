@@ -12,7 +12,7 @@ from flaskr.pages import Upload
 from io import BytesIO
 from PIL import Image
 import base64
-
+import json
 
 class Backend:
 
@@ -40,7 +40,7 @@ class Backend:
         return blobs
 
     #Takes a file and uploads it to cloud storage if it doesn't already exist.
-    def upload(self, file):
+    def upload(self, file, username):
         #Creates a blob
         blob = self.wiki_content_bucket.blob(file.filename)
         #Checks if it already exists
@@ -50,10 +50,18 @@ class Backend:
         else:
             #Else, upload and then return
             blob.upload_from_file(file)
+            user = self.users_info_bucket.blob(username + '.txt')
+            with user.open("r") as f:
+                data = f.read()
+                info = json.loads(data)
+            with user.open("w") as f:
+                info["pages_authored"].append(file.filename)
+                data = json.dumps(info)
+                f.write(data)
             return "Passed"
 
     #Creates a new user, saved as a txt file with a hashed password inside
-    def sign_up(self, user, password):
+    def sign_up(self, first_name, last_name, user, password):
         # Generated random key with secrets.token_hex()
         secret_key = '5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
         #Checks if these handful of characters (space, comma, backslash, forwardslash)
@@ -62,6 +70,7 @@ class Backend:
         if " " in user or "," in user or "\\" in user or "/" in user:
             return "Invalid characters in username."
         blob = self.users_passwords_bucket.blob(user + '.txt')
+        blob2 = self.users_info_bucket.blob(user + '.txt')
         #Adds 'salt' to the password before hashing to make it so two people with the same
         #password don't have the same hash. The secret key also helps to further obscure the data.
         with_salt = f"{user}{secret_key}{password}"
@@ -73,6 +82,19 @@ class Backend:
             return "Username is taken."
         #Otherwise, it writes the password to the file.
         else:
+            with blob2.open('w') as f:
+                user_dict = {
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "username": user,
+                    "pages_authored": [],
+                    "bio": None,
+                    "DOB": None,
+                    "location": None
+                }
+                data = json.dumps(user_dict)
+                f.write(data)
+
             with blob.open('w') as f:
                 f.write(password)
             return "Success"
@@ -176,3 +198,27 @@ class Backend:
         return "Success"
     '''
 
+    def get_user_info(self, username):
+        user = self.users_info_bucket.blob(username + '.txt')
+        with user.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info
+
+    def helper_update_user_info(self, username, bio, dob, location):
+        # getting user info
+        info = self.get_user_info(username)
+
+        # updating the user info
+        info["bio"] = bio
+        info["DOB"] = dob
+        info["location"] = location
+        data = json.dumps(info)
+        return data
+
+    def update_user_info(self, username, bio, dob, location):
+        user = self.users_info_bucket.blob(username + '.txt')
+        data = self.helper_update_user_info(username, bio, dob, location)
+        with user.open("w") as f:
+            f.write(data)
+        return

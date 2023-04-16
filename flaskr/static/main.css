@@ -8,3 +8,10 @@ body {
     font-family: verdana;
     color:palevioletred;
 }
+
+.bigger_field {
+    width: 1750px; 
+    height: 80px; 
+    border: 1px solid #999999; 
+    padding: 5px;
+}

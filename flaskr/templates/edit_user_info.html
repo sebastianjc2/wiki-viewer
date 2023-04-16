@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile Information{% endblock %}
+
+
+{% block content %}
+
+<h1>Edit Profile Information</h1>
+
+<form method="POST" action="">
+    <label for="bio">Write a brief description / bio:</label><br>
+    <textarea id="bio" name="bio" rows="4" cols="75" value="">{% if info["bio"] %}{{info["bio"]}}{% else %}""{% endif %}</textarea><br><br>
+    <label for="DOB">Date of Birth:</label><br>
+    <input type="date" id="DOB" name="DOB" value="{% if info["DOB"] %}{{info["DOB"]}}{% endif %}"><br><br>
+    <label for="location">Location:</label><br>
+    <input type="text" id="location" name="location" value="{% if info["location"] %}{{info["location"]}}{% else %}""{% endif %}"><br><br>
+    <input type="submit" value="Update Profile Information"> 
+</form>
+
+{% endblock %}

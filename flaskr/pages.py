@@ -17,6 +17,9 @@ class LoginForm(FlaskForm):
 
 
 class SignupForm(FlaskForm):
+    first_name = StringField(
+        validators=[InputRequired(), Length(min=2, max=25)])
+    last_name = StringField(validators=[InputRequired(), Length(min=2, max=25)])
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
     password = PasswordField(
         validators=[InputRequired(), Length(min=8, max=25)])
@@ -138,7 +141,9 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            sign_up_status = backend.sign_up(form.username.data,
+            sign_up_status = backend.sign_up(form.first_name.data,
+                                             form.last_name.data,
+                                             form.username.data,
                                              form.password.data)
             if sign_up_status == "Success":
                 login_user(user, remember=True)
@@ -174,8 +179,30 @@ def make_endpoints(app, backend):
             # If the user does not select a file, the browser submits an
             # empty file without a filename.
             if file and allowed_file(file.filename):
-                upload_outcome = backend.upload(file)
+                upload_outcome = backend.upload(file, current_user.get_id())
                 if upload_outcome == "Exists":
                     return "A file by this name already exists."
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
+
+    @app.route("/user", methods=["POST", "GET"])
+    @login_required
+    def user():
+        info = backend.get_user_info(current_user.get_id())
+        if request.method == "POST":
+            return redirect(url_for('edit_user_information'))
+        return render_template("user.html", info=info, user=current_user)
+
+    @app.route("/edit_info", methods=["POST", "GET"])
+    @login_required
+    def edit_user_information():
+        if request.method == "POST":
+            bio = request.form["bio"]
+            dob = request.form["DOB"]
+            location = request.form["location"]
+            backend.update_user_info(current_user.get_id(), bio, dob, location)
+            return redirect(url_for('user'))
+        info = backend.get_user_info(current_user.get_id())
+        return render_template("edit_user_info.html",
+                               info=info,
+                               user=current_user)
