@@ -93,25 +93,36 @@ def test_upload_preexisting():
     file.filename.return_value("test.txt")
     #Asserting that it returns 'Exists' which is what it should return if
     #it correctly realized there was a preexisting file by the same name
-    assert mocker.upload(file) == "Exists"
+    assert mocker.upload(file, "test") == "Exists"
 
 
 #Tests the upload method in the case it uploads without error
 def test_upload_pass():
-    #Mocking the storage, backend, bucket, and blob
+    #Mocking the storage, bucket
     storage_client = MagicMock()
-    test_wiki_content_bucket = storage_client.bucket.return_value
-    mocker = Backend(storage_client)
-    test_blob = test_wiki_content_bucket.blob.return_value
-    #Setting a return value for blob.exists to false so it will run as if
-    #there is no file by the same name, executing normally.
-    test_blob.exists.return_value = False
-    #Mocking the file class
+    user_profile_bucket = MagicMock()
+
+    # # #Mocking the file class
     file = MagicMock()
     file.filename.return_value("test.txt")
-    #Asserting that it returns 'Passed' which is what it should return if it doesn't
-    #run into another file by the same name
-    assert mocker.upload(file) == "Passed"
+
+    storage_client.bucket.return_value = user_profile_bucket
+    blob = MagicMock()
+    user_profile_bucket.blob.return_value = blob
+
+    # Setting a return value for blob.exists to false so it will run as if
+    # there is no file by the same name, executing normally.
+    blob.exists.return_value = False
+
+    file_mock = MagicMock()
+    blob.open = mock_open("Test page :D")
+    file_mock.read.return_value = '{"sdsasd": "blabla"}'
+
+    backend = Backend(storage_client)
+
+    # Asserting that it returns 'Passed' which is what it should return if it doesn't
+    # run into another file by the same name
+    assert backend.upload(file, "test") == "Passed"
 
 
 #Testing the signup function to make sure it will properly return when invalid
@@ -213,3 +224,18 @@ def test_sign_in_password_pass():
     )
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
+
+
+def test_get_user_info():
+    ''' Tests the get_user_info function by making sure that it returns the expected info
+    which means it correctly collected the user's information. '''
+    # Mocking the storage client, the backend, the bucket and the blobs.
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    # using mock open to mock the user.open("r") as f command
+    test_blob.open = mock_open('{"test1":"test", "test2":"test"}')
+
+    assert mocker.get_user_info("test") == {"test1": "test", "test2": "test"}

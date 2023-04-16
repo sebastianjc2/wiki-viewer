@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}User Profile Page{% endblock %}
+
+
+{% block content %}
+
+<h1>{{info["username"]}}'s profile page</h1>
+
+<h2>{{info["first_name"] + " " + info["last_name"]}}</h2>
+
+{% if info["pages_authored"] |length > 0 %}
+    <h4>Pages authored:</h4>
+    <ul>
+        {% for page in info["pages_authored"] %}
+        <li>
+            <p>{{page}}</p>
+        </li>
+    {% endfor%}
+    </ul>
+{% endif %}
+
+{% endblock %}

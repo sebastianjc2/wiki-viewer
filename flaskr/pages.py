@@ -163,8 +163,14 @@ def make_endpoints(app, backend):
             # If the user does not select a file, the browser submits an
             # empty file without a filename.
             if file and allowed_file(file.filename):
-                upload_outcome = backend.upload(file)
+                upload_outcome = backend.upload(file, current_user.get_id())
                 if upload_outcome == "Exists":
                     return "A file by this name already exists."
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
+
+    @app.route("/user", methods=["POST", "GET"])
+    @login_required
+    def user():
+        info = backend.get_user_info(current_user.get_id())
+        return render_template("user.html", info=info, user=current_user)
