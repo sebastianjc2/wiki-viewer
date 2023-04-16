@@ -174,15 +174,20 @@ class Backend:
             info = json.loads(data)
         return info
 
+    def helper_update_user_info(self, username, bio, dob, location):
+        # getting user info
+        info = self.get_user_info(username)
+
+        # updating the user info
+        info["bio"] = bio
+        info["DOB"] = dob
+        info["location"] = location
+        data = json.dumps(info)
+        return data
+
     def update_user_info(self, username, bio, dob, location):
         user = self.users_info_bucket.blob(username + '.txt')
-        with user.open("r") as f:
-            data = f.read()
-            info = json.loads(data)
+        data = self.helper_update_user_info(username, bio, dob, location)
         with user.open("w") as f:
-            info["bio"] = bio
-            info["DOB"] = dob
-            info["location"] = location
-            data = json.dumps(info)
             f.write(data)
         return

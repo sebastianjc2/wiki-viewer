@@ -1,5 +1,5 @@
 from flaskr.backend import Backend
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import base64
 
 
@@ -21,6 +21,9 @@ def mock_open(mock_value):
 
         def read(self):
             return self.text
+
+        def write(self, data):
+            return data
 
     return MockOpen
 
@@ -200,6 +203,22 @@ def test_sign_up_success():
     assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
 
 
+def test_sign_up_two_different_buckets():
+    #Mocking storage, backend, buckets, and blob
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user_passwords = storage_client.bucket.return_value
+    test_user_profile = storage_client.bucket.return_value
+    test_blob_profile = test_user_profile.blob.return_value
+    test_blob_pw = test_user_passwords.blob.return_value
+    #Setting the .exists return value to true to mock that username being free
+    test_blob_pw.exists.return_value = False
+    #Asserts 'Success' for a successful signup
+    assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
+    test_blob_profile.open.assert_called_with("w")
+    test_blob_pw.open.assert_called_with("w")
+
+
 #Testing a failed sign in for username
 def test_sign_in_username_fail():
     #Mocking storage, backend, buckets, and blob
@@ -244,3 +263,39 @@ def test_sign_in_password_pass():
     )
     #Asserts 'Passed' for successfully signing in using the correct password
     assert mocker.sign_in('test', 'testpass') == 'Passed'
+
+
+def test_get_user_info():
+    ''' Tests the get_user_info function by making sure that it returns the expected info
+    which means it correctly collected the user's information. '''
+    # Mocking the storage client, the backend, the bucket and the blobs.
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    # using mock open to mock the user.open("r") as f command
+    test_blob.open = mock_open('{"test1":"test", "test2":"test"}')
+
+    assert mocker.get_user_info("test") == {"test1": "test", "test2": "test"}
+
+
+def test_helper_update_user_info():
+    ''' Tests the update_user_info function. '''
+    # Mocking the storage client, the backend, the bucket and the blobs.
+    storage_client = MagicMock()
+    backend = Backend(storage_client)
+    with patch("flaskr.backend.Backend.get_user_info",
+               return_value={
+                   "first_name": "Sebastian",
+                   "last_name": "Test",
+                   "username": "sebastiantest",
+                   "pages_authored": [],
+                   "bio": "test",
+                   "DOB": "test",
+                   "location": "test"
+               }):
+        assert str(
+            backend.helper_update_user_info("sebastiantest", "random bio",
+                                            "2022-01-01", "USA")
+        ) == '{"first_name": "Sebastian", "last_name": "Test", "username": "sebastiantest", "pages_authored": [], "bio": "random bio", "DOB": "2022-01-01", "location": "USA"}'
