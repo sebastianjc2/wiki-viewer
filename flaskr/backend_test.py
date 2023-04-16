@@ -106,9 +106,7 @@ def test_upload_preexisting_fail():
 
     #Asserting that it returns 'Exists' which is what it should return if
     #it correctly realized there was a preexisting file by the same name
-    assert mocker.upload(
-        file, "not_the_author"
-    ) == "Exists"
+    assert mocker.upload(file, "not_the_author") == "Exists"
 
 
 #!!!RECOMMENT THIS CODE WAS CHANGED!!!
