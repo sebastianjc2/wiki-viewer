@@ -17,6 +17,9 @@ class LoginForm(FlaskForm):
 
 
 class SignupForm(FlaskForm):
+    first_name = StringField(
+        validators=[InputRequired(), Length(min=2, max=25)])
+    last_name = StringField(validators=[InputRequired(), Length(min=2, max=25)])
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
     password = PasswordField(
         validators=[InputRequired(), Length(min=8, max=25)])
@@ -122,7 +125,9 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            sign_up_status = backend.sign_up(form.username.data,
+            sign_up_status = backend.sign_up(form.first_name.data,
+                                             form.last_name.data,
+                                             form.username.data,
                                              form.password.data)
             if sign_up_status == "Success":
                 login_user(user, remember=True)

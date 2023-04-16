@@ -122,7 +122,7 @@ def test_sign_up_invalid():
     mocker = Backend(storage_client)
     #Asserts that with this user containing all of the illegal characters, it will return
     #'Invalid characters in username.' which is what is expected when there are illegal characters
-    assert mocker.sign_up('Invalid user\\ / ,',
+    assert mocker.sign_up("Bob", "Williams", 'Invalid user\\ / ,',
                           "testpass") == "Invalid characters in username."
 
 
@@ -136,7 +136,8 @@ def test_sign_up_taken_user():
     #Setting the .exists return value to true to mock that username being taken
     test_blob.exists.return_value = True
     #Asserts 'Username is taken.', which is the expected return
-    assert mocker.sign_up('test', 'testpass') == 'Username is taken.'
+    assert mocker.sign_up("Bob", "Williams", 'test',
+                          'testpass') == 'Username is taken.'
 
 
 #Testing a successful signup
@@ -149,7 +150,23 @@ def test_sign_up_success():
     #Setting the .exists return value to true to mock that username being free
     test_blob.exists.return_value = False
     #Asserts 'Success' for a successful signup
-    assert mocker.sign_up('blah', 'testpass') == 'Success'
+    assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
+
+
+def test_sign_up_two_different_buckets():
+    #Mocking storage, backend, buckets, and blob
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user_passwords = storage_client.bucket.return_value
+    test_user_profile = storage_client.bucket.return_value
+    test_blob_profile = test_user_profile.blob.return_value
+    test_blob_pw = test_user_passwords.blob.return_value
+    #Setting the .exists return value to true to mock that username being free
+    test_blob_pw.exists.return_value = False
+    #Asserts 'Success' for a successful signup
+    assert mocker.sign_up("Bob", "Williams", 'blah', 'testpass') == 'Success'
+    test_blob_profile.open.assert_called_with("w")
+    test_blob_pw.open.assert_called_with("w")
 
 
 #Testing a failed sign in for username
