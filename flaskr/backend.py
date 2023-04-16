@@ -50,7 +50,6 @@ class Backend:
             user = self.users_info_bucket.blob(username + '.txt')
             with user.open("r") as f:
                 data = f.read()
-                print(data)
                 info = json.loads(data)
             with user.open("w") as f:
                 info["pages_authored"].append(file.filename)
@@ -85,7 +84,10 @@ class Backend:
                     "first_name": first_name,
                     "last_name": last_name,
                     "username": user,
-                    "pages_authored": []
+                    "pages_authored": [],
+                    "bio": None,
+                    "DOB": None,
+                    "location": None
                 }
                 data = json.dumps(user_dict)
                 f.write(data)
@@ -139,3 +141,21 @@ class Backend:
             data = f.read()
             info = json.loads(data)
         return info
+
+    def helper_update_user_info(self, username, bio, dob, location):
+        # getting user info
+        info = self.get_user_info(username)
+
+        # updating the user info
+        info["bio"] = bio
+        info["DOB"] = dob
+        info["location"] = location
+        data = json.dumps(info)
+        return data
+
+    def update_user_info(self, username, bio, dob, location):
+        user = self.users_info_bucket.blob(username + '.txt')
+        data = self.helper_update_user_info(username, bio, dob, location)
+        with user.open("w") as f:
+            f.write(data)
+        return
