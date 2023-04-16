@@ -17,6 +17,9 @@ class LoginForm(FlaskForm):
 
 
 class SignupForm(FlaskForm):
+    first_name = StringField(
+        validators=[InputRequired(), Length(min=2, max=25)])
+    last_name = StringField(validators=[InputRequired(), Length(min=2, max=25)])
     username = StringField(validators=[InputRequired(), Length(min=3, max=25)])
     password = PasswordField(
         validators=[InputRequired(), Length(min=8, max=25)])
@@ -68,23 +71,28 @@ def make_endpoints(app, backend):
     @app.route("/pages", methods=["POST", "GET"])
     def pages():
         pages = backend.get_all_page_names()
-        user_favs = backend.get_favorites_list(user=current_user)
+        if current_user.is_authenticated:
+            user_favs = backend.get_favorites_list(user=current_user)
 
         if request.method == 'POST':
             page_name = request.form['page_name']
-            post_type = request.form['post_type']
+            edit_type = request.form['edit_type']
 
-            backend.favorites_list_editing(user=current_user,
-                                           page_name=page_name,
-                                           post_type=post_type)
+            if edit_type == "add":
+                backend.add_favorite(user=current_user, page_name=page_name)
+            elif edit_type == "remove":
+                backend.remove_favorite(user=current_user, page_name=page_name)
 
         #TODO: when you refresh the page, the hearts are unhearted. make sure that when you refresh, the hearts stay hearted.
-        #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List" (done - chris)
+        #TODO(for teammate): add the favorites list with the hearts under the title "Favorites List"
 
-        return render_template("pages.html",
-                               pages=pages,
-                               user=current_user,
-                               favorites=user_favs)
+        if current_user.is_authenticated:
+            return render_template("pages.html",
+                                   pages=pages,
+                                   user=current_user,
+                                   favorites=user_favs)
+        else:
+            return render_template("pages.html", pages=pages, user=current_user)
 
     ''' This function routes to the specific individual wiki pages with band content in them, and it uses backend.get_wiki_page to get all the content from the bucket for this specific wiki page.
     This will get called with /pages/<pagename> in the url and renders the pages_Content.html template'''
@@ -138,7 +146,9 @@ def make_endpoints(app, backend):
             # check if backend stuff went well
             # if it did, then:
             user = User(form.username.data)
-            sign_up_status = backend.sign_up(form.username.data,
+            sign_up_status = backend.sign_up(form.first_name.data,
+                                             form.last_name.data,
+                                             form.username.data,
                                              form.password.data)
             if sign_up_status == "Success":
                 login_user(user, remember=True)
@@ -174,8 +184,30 @@ def make_endpoints(app, backend):
             # If the user does not select a file, the browser submits an
             # empty file without a filename.
             if file and allowed_file(file.filename):
-                upload_outcome = backend.upload(file)
+                upload_outcome = backend.upload(file, current_user.get_id())
                 if upload_outcome == "Exists":
-                    return "A file by this name already exists."
+                    return "Only the original author can reupload their pages."
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
+
+    @app.route("/user", methods=["POST", "GET"])
+    @login_required
+    def user():
+        info = backend.get_user_info(current_user.get_id())
+        if request.method == "POST":
+            return redirect(url_for('edit_user_information'))
+        return render_template("user.html", info=info, user=current_user)
+
+    @app.route("/edit_info", methods=["POST", "GET"])
+    @login_required
+    def edit_user_information():
+        if request.method == "POST":
+            bio = request.form["bio"]
+            dob = request.form["DOB"]
+            location = request.form["location"]
+            backend.update_user_info(current_user.get_id(), bio, dob, location)
+            return redirect(url_for('user'))
+        info = backend.get_user_info(current_user.get_id())
+        return render_template("edit_user_info.html",
+                               info=info,
+                               user=current_user)

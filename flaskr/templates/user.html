@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}User Profile Page{% endblock %}
+
+
+{% block content %}
+
+<h1>{{info["username"]}}'s profile page</h1>
+
+<h2>{{info["first_name"] + " " + info["last_name"]}}</h2>
+
+{% if info["bio"] %}
+    <h4>Bio:</h4>
+    <p>{{info["bio"]}}</p>
+{% endif %}
+
+{% if info["location"] %}
+    <h4>Location:</h4>
+    <p>{{info["location"]}}</p>
+{% endif %}
+
+{% if info["DOB"] %}
+    <h4>Date of Birth:</h4>
+    <p>{{info["DOB"]}}</p>
+{% endif %}
+
+{% if info["pages_authored"] |length > 0 %}
+    <h4>Pages authored:</h4>
+    <ul>
+        {% for page in info["pages_authored"] %}
+        <li>
+            <a href="/pages/{{page[:-4]}}">{{page[:-4]}}</a>
+            <input type="button" onclick="document.location='/upload'"" value="Reupload this page"/>
+        </li>
+    {% endfor%}
+    <br>
+    </ul>
+
+{% endif %}
+<input type="button" onclick="document.location='/edit_info'"" value="Edit Profile Information"/>
+<!-- {% for key, value in info.items() %}
+    {% if key == "username" %}
+        <h1>{{value}}</h1>
+    {% elif key == "first_name" %}
+        <h2>{{value}}</h2>
+    {% elif key == "last_name" %}
+        <h2>{{value}}</h2>
+    {% elif key == "pages_authored" %}
+        <h3>Pages Authored:</h3>
+        {% if value |length != 0 %}
+            {% for page in value %}
+                <li>
+                    <p>{{page}}</p>
+                </li>
+            {% endfor%}
+        {% endif %}
+    {% endif %}
+{% endfor %} -->
+
+{% endblock %}

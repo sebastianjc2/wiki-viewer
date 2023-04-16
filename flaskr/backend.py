@@ -12,7 +12,7 @@ from flaskr.pages import Upload
 from io import BytesIO
 from PIL import Image
 import base64
-
+import json
 
 class Backend:
 
@@ -25,14 +25,15 @@ class Backend:
         self.users_passwords_bucket = self.storage_client.bucket(
             "users_passwords")
         self.images_about_bucket = self.storage_client.bucket("images_about")
-        self.users_favorites_bucket = self.storage_client.bucket(
-            "users_favorites")
+        self.users_info_bucket = self.storage_client.bucket("users_profiles")
 
     #Returns a page from the wiki content bucket
     def get_wiki_page(self, pageName):
         blob = self.wiki_content_bucket.get_blob(pageName)
         with blob.open("r") as f:
-            return f.read()
+            raw = f.read()
+            info = json.loads(raw)
+            return info["content"]
 
     #Returns a list of all the files uploaded to the wiki-content bucket
     def get_all_page_names(self):
@@ -40,20 +41,58 @@ class Backend:
         return blobs
 
     #Takes a file and uploads it to cloud storage if it doesn't already exist.
-    def upload(self, file):
+    def upload(self, file_up, username):
         #Creates a blob
-        blob = self.wiki_content_bucket.blob(file.filename)
+        blob = self.wiki_content_bucket.blob(file_up.filename)
         #Checks if it already exists
         if blob.exists(self.storage_client):
-            #If it does, return without upload
-            return "Exists"
+            with blob.open("r") as f:
+                raw = f.read()
+                info = json.loads(raw)
+            #If it does, we check the author
+            if info["author"] != username:
+                #If the original author isnt the one trying to reupload it, it will return early.
+                #Otherwise, it will continue.
+                return "Exists"
+            else:
+                blob.upload_from_file(file_up)
+                with blob.open("r") as f:
+                    content = f.readlines()
+                with blob.open("w") as f:
+                    modified = []
+                    for line in content:
+                        modified.append(line.strip())
+                    content_and_author = {
+                        "content": modified,
+                        "author": username
+                    }
+                    f.write(json.dumps(content_and_author, indent=2))
+                return "Passed"
         else:
             #Else, upload and then return
-            blob.upload_from_file(file)
+            blob.upload_from_file(file_up)
+
+            with blob.open("r") as f:
+                content = f.readlines()
+            with blob.open("w") as f:
+                modified = []
+                for line in content:
+                    modified.append(line.strip())
+                content_and_author = {"content": modified, "author": username}
+                f.write(json.dumps(content_and_author, indent=2))
+
+            user = self.users_info_bucket.blob(username + '.txt')
+            with user.open("r") as f:
+                data = f.read()
+                info = json.loads(data)
+            with user.open("w") as f:
+                info["pages_authored"].append(file_up.filename)
+                data = json.dumps(info)
+                f.write(data)
             return "Passed"
 
     #Creates a new user, saved as a txt file with a hashed password inside
-    def sign_up(self, user, password):
+    def sign_up(self, first_name, last_name, user, password):
         # Generated random key with secrets.token_hex()
         secret_key = '5cfdb0b2f0177067d707306d43820b1bd479a558ad5ce7eac645cb77f8aacaa1'
         #Checks if these handful of characters (space, comma, backslash, forwardslash)
@@ -62,6 +101,7 @@ class Backend:
         if " " in user or "," in user or "\\" in user or "/" in user:
             return "Invalid characters in username."
         blob = self.users_passwords_bucket.blob(user + '.txt')
+        blob2 = self.users_info_bucket.blob(user + '.txt')
         #Adds 'salt' to the password before hashing to make it so two people with the same
         #password don't have the same hash. The secret key also helps to further obscure the data.
         with_salt = f"{user}{secret_key}{password}"
@@ -73,6 +113,20 @@ class Backend:
             return "Username is taken."
         #Otherwise, it writes the password to the file.
         else:
+            with blob2.open('w') as f:
+                user_dict = {
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "username": user,
+                    "pages_authored": [],
+                    "favorites": [],
+                    "bio": None,
+                    "DOB": None,
+                    "location": None
+                }
+                data = json.dumps(user_dict)
+                f.write(data)
+
             with blob.open('w') as f:
                 f.write(password)
             return "Success"
@@ -116,39 +170,59 @@ class Backend:
             content_type = blob.content_type
         return content_type, img
 
+    def get_user_info(self, username):
+        user = self.users_info_bucket.blob(username + '.txt')
+        with user.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info
+
+    def helper_update_user_info(self, username, bio, dob, location):
+        # getting user info
+        info = self.get_user_info(username)
+
+        # updating the user info
+        info["bio"] = bio
+        info["DOB"] = dob
+        info["location"] = location
+        data = json.dumps(info)
+        return data
+
+    def update_user_info(self, username, bio, dob, location):
+        user = self.users_info_bucket.blob(username + '.txt')
+        data = self.helper_update_user_info(username, bio, dob, location)
+        with user.open("w") as f:
+            f.write(data)
+        return
+
     def get_favorites_list(self, user):
-        current_contents = []
-        if user.is_authenticated:
-            username = user.name + '.txt'
-            blob = self.users_favorites_bucket.blob(username)
-            try:
-                current_contents = blob.download_as_bytes().decode(
-                    'utf-8').rstrip(",").split(',')
-            except google.cloud.exceptions.NotFound:
-                pass
-        return current_contents
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        with user_blob.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info['favorites']
 
-    def favorites_list_editing(self, user, page_name, post_type):
-        username = user.name + '.txt'
-        blob = self.users_favorites_bucket.blob(username)
+    def helper_update_favorites_list(self, user, page_name, edit_type):
+        info = self.get_user_info(user.name)
 
-        current_contents = []
+        if edit_type == "add":
+            info['favorites'].append(page_name)
+        elif edit_type == "remove":
+            info['favorites'].remove(page_name)
 
-        try:
-            current_contents = blob.download_as_bytes().decode('utf-8').split(
-                ',')
-        except google.cloud.exceptions.NotFound:
-            pass
+        data = json.dumps(info)
+        return data
 
-        if post_type == "addition":
-            if page_name not in current_contents:
-                current_contents.append(page_name)
-        elif post_type == "deletion":
-            current_contents.remove(page_name)
+    def add_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'add')
+        with user_blob.open("w") as f:
+            f.write(data)
+        return
 
-        updated_contents = ','.join(current_contents)
-
-        with blob.open('w') as f:
-            f.write(updated_contents)
-
-        return "Success"
+    def remove_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'remove')
+        with user_blob.open("w") as f:
+            f.write(data)
+        return

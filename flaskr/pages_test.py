@@ -84,27 +84,31 @@ def test_pages_not_logged_in(app, client):
 backend method to return that string. Then once we do client.get(/pages/Ataxia), we assert that the string is inside that response.'''
 
 
-def test_individual_page(app, client):
-    file1 = "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
+#Fix this for real later!!!
+def test_individual_page_pizza(app, client):
+    file1 = [
+        "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
+    ]
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/Ataxia")
         assert resp.status_code == 200
         print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
+        assert file1[0] in resp.data.decode("utf-8")
+
 
 
 ''' Same as above, with also a test page name'''
 
 
 def test_individual_page_routing(app, client):
-    file1 = "This is a test file"
+    file1 = ["This is a test file"]
     page_name = "test"
 
     with patch("flaskr.backend.Backend.get_wiki_page", return_value=file1):
         resp = client.get("/pages/<page_name>")
         assert resp.status_code == 200
         print(resp.data.decode("utf-8"))
-        assert file1 in resp.data.decode("utf-8")
+        assert file1[0] in resp.data.decode("utf-8")
 
 
 ''' NEW FIXTURES FOR LOGIN RELATED TESTS'''
@@ -140,6 +144,26 @@ def test_navbar_and_home_page_change_when_logged_in(app2, client2):
         assert "Welcome to the Wiki, Sebastian!" in expected
         assert "Logout" in expected
         assert expected == resp.text
+
+
+def test_user_GET(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "swiki",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                   }):
+            resp = c.get("/user")
+            print(resp.text)
+            assert resp.status_code == 200
+            assert "Sebastian" in resp.text
+            assert "swiki" in resp.text
+            assert "Test" in resp.text
+            assert "Pages authored" in resp.text
+            assert "test1.txt" in resp.text and "test2.txt" in resp.text
 
 
 ''' It tests that the response is correctly GETting the login template (when the /login route is called)'''
@@ -272,6 +296,8 @@ def test_signup_post_redirects_TRUE(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
+                              "first_name": "Bob",
+                              "last_name": "Williams",
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -294,6 +320,8 @@ def test_signup_post_auto_redirects_FALSE(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
+                              "first_name": "Bob",
+                              "last_name": "Williams",
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -317,6 +345,8 @@ def test_signup_post_username_already_taken(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
+                              "first_name": "Bob",
+                              "last_name": "Williams",
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -334,6 +364,8 @@ def test_signup_post_invalid_characters(app2, client2):
             resp = c.post("/signup",
                           data={
                               "csrf_token": "Ignore",
+                              "first_name": "Bob",
+                              "last_name": "Williams",
                               "username": "Bob",
                               "password": "test1234",
                               "submit": "Login"
@@ -385,7 +417,6 @@ def test_pages_logged_in_GET(app2, client2):
                 assert resp.status_code == 200
 
                 assert b"Favorites List" in resp.data
-                assert b"blah" in resp.data
                 assert b"Pages contained in this Wiki" in resp.data
                 assert b"blah" in resp.data
                 assert b"test" in resp.data
@@ -404,12 +435,11 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
                    return_value=[file1, file2]):
             with patch("flaskr.backend.Backend.get_favorites_list",
                        return_value=["test1", "test2"]):
-                with patch("flaskr.backend.Backend.favorites_list_editing",
-                           return_value="Success"):
+                with patch("flaskr.backend.Backend.add_favorite"):
                     resp = c.post("/pages",
                                   data={
                                       "page_name": "test",
-                                      "post_type": "addition"
+                                      "edit_type": "add"
                                   },
                                   follow_redirects=True)
                     assert resp.status_code == 200
@@ -418,6 +448,130 @@ def test_pages_logged_in_POST_TRUE(app2, client2):
                     assert b"Pages contained in this Wiki" in resp.data
                     assert b"blah" in resp.data
                     assert b"test" in resp.data
+
+
+def test_user_GET(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.get("/user")
+            assert resp.status_code == 200
+            assert "Sebastian" in resp.text
+            assert "sebastiantest" in resp.text
+            assert "Test" in resp.text
+            assert "Pages Authored" in resp.text
+            assert "test1.txt" in resp.text and "test2.txt" in resp.text
+            assert "Bio" in resp.text and "I Like Rock Music" in resp.text
+            assert not "Date of Birth" in resp.text
+            assert not "Location" in resp.text
+
+
+def test_user_POST_redirects_TRUE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.post("/user", follow_redirects=True)
+            print(resp.text)
+            assert "Write a brief description" in resp.text
+            assert resp.status_code == 200  # Means it already redirected to home
+            # Already redirected because follow_redirects=True
+
+
+def test_edit_user_information_GET(app2, client2):
+    user = User("sebastiantest")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            resp = c.get("/edit_info")
+            print(resp.text)
+            assert resp.status_code == 200
+            assert "I Like Rock Music" in resp.text
+            assert "Date of Birth" in resp.text
+            assert "Location" in resp.text
+            assert not "Pages Authored" in resp.text
+            assert "Update Profile Information"
+            assert not "Sebastian" in resp.text
+            assert not "Test" in resp.text
+
+
+def test_edit_user_info_POST_redirects_TRUE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            with patch("flaskr.backend.Backend.update_user_info"):
+                resp = c.post("/edit_info",
+                              data={
+                                  "bio": "test",
+                                  "DOB": "None",
+                                  "location": "None"
+                              },
+                              follow_redirects=True)
+                assert resp.status_code == 200  # already redirected to user page
+                assert "Sebastian" in resp.text
+                assert "sebastiantest" in resp.text
+                assert "Test" in resp.text
+                assert "Pages Authored" in resp.text
+                assert "test1.txt" in resp.text and "test2.txt" in resp.text
+
+
+def test_user_POST_redirects_FALSE(app2, client2):
+    user = User("Sebastian")
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_user_info",
+                   return_value={
+                       "username": "sebastiantest",
+                       "first_name": "Sebastian",
+                       "last_name": "Test",
+                       "pages_authored": ["test1.txt", "test2.txt"],
+                       "bio": "I Like Rock Music",
+                       "DOB": None,
+                       "location": None
+                   }):
+            with patch("flaskr.backend.Backend.update_user_info"):
+                resp = c.post("/edit_info",
+                              data={
+                                  "bio": "test",
+                                  "DOB": "None",
+                                  "location": "None"
+                              },
+                              follow_redirects=False)
+                assert "Redirecting" in resp.text  # currently redirecting because follow_redirects = False
+                assert resp.status_code == 302  # should be 302 because we should be redirecting to edit profile information page
 
 
 ''' NEW FIXTURES FOR UPLOAD '''
@@ -460,10 +614,17 @@ def test_upload_get(app3, client3):
 
 
 def test_upload_post(mock_backend, app3, client3):
+
+    file1 = MagicMock()
+    file1.name = "test1.txt"
+
+    file2 = MagicMock()
+    file2.name = "test2.txt"
+
     user = User("Sebastian")
     with app3.test_client(user=user) as c:
         mock_backend.upload.return_value = "Passed"
-        mock_backend.get_all_page_names.return_value = ["test1", "test2"]
+        mock_backend.get_all_page_names.return_value = [file1, file2]
         resp = c.post("/upload",
                       follow_redirects=True,
                       data=dict(file=(io.BytesIO(b"this is a test"),
