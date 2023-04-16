@@ -5,6 +5,9 @@ from wtforms import StringField, PasswordField, FileField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from werkzeug.utils import secure_filename
 import hashlib
+from google.api_core.exceptions import NotFound
+import google.cloud
+from google.cloud import exceptions
 from flaskr.pages import Upload
 from io import BytesIO
 from PIL import Image
@@ -117,6 +120,7 @@ class Backend:
                     "last_name": last_name,
                     "username": user,
                     "pages_authored": [],
+                    "favorites": [],
                     "bio": None,
                     "DOB": None,
                     "location": None
@@ -189,5 +193,37 @@ class Backend:
         user = self.users_info_bucket.blob(username + '.txt')
         data = self.helper_update_user_info(username, bio, dob, location)
         with user.open("w") as f:
+            f.write(data)
+        return
+
+    def get_favorites_list(self, user):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        with user_blob.open("r") as f:
+            data = f.read()
+            info = json.loads(data)
+        return info['favorites']
+
+    def helper_update_favorites_list(self, user, page_name, edit_type):
+        info = self.get_user_info(user.name)
+
+        if edit_type == "add":
+            info['favorites'].append(page_name)
+        elif edit_type == "remove":
+            info['favorites'].remove(page_name)
+
+        data = json.dumps(info)
+        return data
+
+    def add_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'add')
+        with user_blob.open("w") as f:
+            f.write(data)
+        return
+
+    def remove_favorite(self, user, page_name):
+        user_blob = self.users_info_bucket.blob(user.name + '.txt')
+        data = self.helper_update_favorites_list(user, page_name, 'remove')
+        with user_blob.open("w") as f:
             f.write(data)
         return

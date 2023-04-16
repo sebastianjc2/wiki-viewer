@@ -1,5 +1,6 @@
 from flaskr.backend import Backend
 from unittest.mock import MagicMock, patch
+from flaskr.user import User
 import base64
 
 
@@ -263,8 +264,22 @@ def test_sign_in_password_pass():
     assert mocker.sign_in('test', 'testpass') == 'Passed'
 
 
+'''
+def test_get_favorites_list():
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user = User("test")
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    test_blob.open = mock_open('test1,test2')
+    test_blob.download_as_string.return_value.decode.return_value = 'test1,test2'
+    assert mocker.get_favorites_list(test_user) == ['test1', 'test2']
+'''
+
+
 def test_get_user_info():
-    ''' Tests the get_user_info function by making sure that it returns the expected info
+    '''Tests the get_user_info function by making sure that it returns the expected info
     which means it correctly collected the user's information. '''
     # Mocking the storage client, the backend, the bucket and the blobs.
     storage_client = MagicMock()
@@ -297,3 +312,56 @@ def test_helper_update_user_info():
             backend.helper_update_user_info("sebastiantest", "random bio",
                                             "2022-01-01", "USA")
         ) == '{"first_name": "Sebastian", "last_name": "Test", "username": "sebastiantest", "pages_authored": [], "bio": "random bio", "DOB": "2022-01-01", "location": "USA"}'
+
+
+def test_get_favorites_list():
+    storage_client = MagicMock()
+    mocker = Backend(storage_client)
+    test_user_info = storage_client.bucket.return_value
+    test_blob = test_user_info.blob.return_value
+
+    # using mock open to mock the user.open("r") as f command
+    test_blob.open = mock_open(
+        '{"test1":"test", "test2":"test", "favorites":["favorite1"]}')
+    user = User("usertest")
+    assert mocker.get_favorites_list(user) == ["favorite1"]
+
+
+def test_helper_update_favorites_list_add():
+    storage_client = MagicMock()
+    backend = Backend(storage_client)
+    user = User("usertest")
+    with patch("flaskr.backend.Backend.get_user_info",
+               return_value={
+                   "first_name": "userfirst",
+                   "last_name": "userlast",
+                   "username": "usertest",
+                   "pages_authored": [],
+                   "favorites": [],
+                   "bio": "test",
+                   "DOB": "test",
+                   "location": "test"
+               }):
+        assert str(
+            backend.helper_update_favorites_list(user, "pagetest", "add")
+        ) == '{"first_name": "userfirst", "last_name": "userlast", "username": "usertest", "pages_authored": [], "favorites": ["pagetest"], "bio": "test", "DOB": "test", "location": "test"}'
+
+
+def test_helper_update_favorites_list_remove():
+    storage_client = MagicMock()
+    backend = Backend(storage_client)
+    user = User("usertest")
+    with patch("flaskr.backend.Backend.get_user_info",
+               return_value={
+                   "first_name": "userfirst",
+                   "last_name": "userlast",
+                   "username": "usertest",
+                   "pages_authored": [],
+                   "favorites": ["favorite1"],
+                   "bio": "test",
+                   "DOB": "test",
+                   "location": "test"
+               }):
+        assert str(
+            backend.helper_update_favorites_list(user, "favorite1", "remove")
+        ) == '{"first_name": "userfirst", "last_name": "userlast", "username": "usertest", "pages_authored": [], "favorites": [], "bio": "test", "DOB": "test", "location": "test"}'

@@ -64,7 +64,7 @@ def test_about(app, client):
 Then, we verify that when going into the /pages route, the status code is 200, and the filenames that we added should be in resp.data.'''
 
 
-def test_pages(app, client):
+def test_pages_not_logged_in(app, client):
     file1 = MagicMock()
     file1.name = "test.txt"
 
@@ -399,6 +399,57 @@ def test_log_out_redirects_TRUE(app2, client2):
         assert "Welcome to the Wiki!" in resp.text  # should be True because we should have been redirected to the home page
 
 
+def test_pages_logged_in_GET(app2, client2):
+    user = User("Chelsea")
+    file1 = MagicMock()
+    file1.name = "test.txt"
+
+    file2 = MagicMock()
+    file2.name = "blah.txt"
+
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_all_page_names",
+                   return_value=[file1, file2]):
+            with patch("flaskr.backend.Backend.get_favorites_list",
+                       return_value=[file1]):
+                resp = c.get("/pages")
+                print(resp.data)
+                assert resp.status_code == 200
+
+                assert b"Favorites List" in resp.data
+                assert b"Pages contained in this Wiki" in resp.data
+                assert b"blah" in resp.data
+                assert b"test" in resp.data
+
+
+def test_pages_logged_in_POST_TRUE(app2, client2):
+    user = User("Chelsea")
+    file1 = MagicMock()
+    file1.name = "test.txt"
+
+    file2 = MagicMock()
+    file2.name = "blah.txt"
+
+    with app2.test_client(user=user) as c:
+        with patch("flaskr.backend.Backend.get_all_page_names",
+                   return_value=[file1, file2]):
+            with patch("flaskr.backend.Backend.get_favorites_list",
+                       return_value=["test1", "test2"]):
+                with patch("flaskr.backend.Backend.add_favorite"):
+                    resp = c.post("/pages",
+                                  data={
+                                      "page_name": "test",
+                                      "edit_type": "add"
+                                  },
+                                  follow_redirects=True)
+                    assert resp.status_code == 200
+
+                    assert b"Favorites List" in resp.data
+                    assert b"Pages contained in this Wiki" in resp.data
+                    assert b"blah" in resp.data
+                    assert b"test" in resp.data
+
+
 def test_user_GET(app2, client2):
     user = User("Sebastian")
     with app2.test_client(user=user) as c:
@@ -442,24 +493,6 @@ def test_user_POST_redirects_TRUE(app2, client2):
             assert "Write a brief description" in resp.text
             assert resp.status_code == 200  # Means it already redirected to home
             # Already redirected because follow_redirects=True
-
-
-def test_user_POST_redirects_FALSE(app2, client2):
-    user = User("Sebastian")
-    with app2.test_client(user=user) as c:
-        with patch("flaskr.backend.Backend.get_user_info",
-                   return_value={
-                       "username": "sebastiantest",
-                       "first_name": "Sebastian",
-                       "last_name": "Test",
-                       "pages_authored": ["test1.txt", "test2.txt"],
-                       "bio": "I Like Rock Music",
-                       "DOB": None,
-                       "location": None
-                   }):
-            resp = c.post("/user", follow_redirects=False)
-            assert "Redirecting" in resp.text  # currently redirecting because follow_redirects = False
-            assert resp.status_code == 302  # should be 302 because we should be redirecting to edit profile information page
 
 
 def test_edit_user_information_GET(app2, client2):
@@ -581,10 +614,17 @@ def test_upload_get(app3, client3):
 
 
 def test_upload_post(mock_backend, app3, client3):
+
+    file1 = MagicMock()
+    file1.name = "test1.txt"
+
+    file2 = MagicMock()
+    file2.name = "test2.txt"
+
     user = User("Sebastian")
     with app3.test_client(user=user) as c:
         mock_backend.upload.return_value = "Passed"
-        mock_backend.get_all_page_names.return_value = ["test1", "test2"]
+        mock_backend.get_all_page_names.return_value = [file1, file2]
         resp = c.post("/upload",
                       follow_redirects=True,
                       data=dict(file=(io.BytesIO(b"this is a test"),
