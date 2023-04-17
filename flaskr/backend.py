@@ -210,12 +210,11 @@ class Backend:
             if page_name not in info['favorites']:
                 info['favorites'].append(page_name)
                 info['favorites'].sort()
-            
+
         elif edit_type == "remove":
             if page_name in info['favorites']:
                 info['favorites'].remove(page_name)
                 info['favorites'].sort()
-            
 
         data = json.dumps(info)
         return data
