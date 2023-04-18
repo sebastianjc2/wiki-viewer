@@ -84,8 +84,7 @@ def test_pages_not_logged_in(app, client):
 backend method to return that string. Then once we do client.get(/pages/Ataxia), we assert that the string is inside that response.'''
 
 
-#Fix this for real later!!!
-def test_individual_page_pizza(app, client):
+def test_individual_page(app, client):
     file1 = [
         "Ataxia was a short-lived American experimental rock supergroup formed in 2004 by guitarist John Frusciante (Red Hot Chili Peppers), bassist Joe Lally (Fugazi) and drummer Josh Klinghoffer (Dot Hacker, The Bicycle Thief), who later succeeded Frusciante as the lead guitarist of the Red Hot Chili Peppers until 2019, at which point Frusciante rejoined the band. Ataxia wrote and recorded songs for two weeks, and the material was separated into two albums: Automatic Writing (2004) and AW II (2007). The songs all feature a ground-bass line with the guitar overlaying different motifs and long developments."
     ]
@@ -625,6 +624,44 @@ def test_upload_post(mock_backend, app3, client3):
         mock_backend.upload.return_value = "Passed"
         mock_backend.get_all_page_names.return_value = [file1, file2]
         resp = c.post("/upload",
+                      follow_redirects=True,
+                      data=dict(file=(io.BytesIO(b"this is a test"),
+                                      'test.txt')))
+        mock_backend.upload.assert_called_once()
+        #print(resp.text)
+        assert resp.status_code == 200
+        assert "Pages contained in this Wiki" in resp.text
+
+
+''' Tests the GET method of the /reupload route. Makes sure that the user is logged in to reupload and it makes sure that it calls the reupload.html form for the user to upload their file.'''
+
+
+def test_reupload_get(app3, client3):
+    user = User("Sebastian")
+    with app3.test_client(user=user) as c:
+        assert user.is_anonymous == False
+        resp = c.get("/reupload")
+        assert resp.status_code == 200
+        expected = render_template("reupload.html", user=user)
+        assert expected == resp.text
+
+
+''' Tests the POST method of the /reupload route. Makes sure that the user is logged in to upload and it makes sure that after the user uploads the file, it reroutes back to the Pages page.'''
+
+
+def test_reupload_post(mock_backend, app3, client3):
+
+    file1 = MagicMock()
+    file1.name = "test1.txt"
+
+    file2 = MagicMock()
+    file2.name = "test2.txt"
+
+    user = User("Sebastian")
+    with app3.test_client(user=user) as c:
+        mock_backend.upload.return_value = "Passed"
+        mock_backend.get_all_page_names.return_value = [file1, file2]
+        resp = c.post("/reupload",
                       follow_redirects=True,
                       data=dict(file=(io.BytesIO(b"this is a test"),
                                       'test.txt')))

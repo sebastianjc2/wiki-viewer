@@ -41,7 +41,7 @@ class Backend:
         blobs = self.storage_client.list_blobs("wiki-content")
         return blobs
 
-    #Takes a file and uploads it to cloud storage if it doesn't already exist.
+    #Takes a file and uploads it to cloud storage if it doesn't already exist or if the user is the author of that existing page.
     def upload(self, file_up, username):
         #Creates a blob
         blob = self.wiki_content_bucket.blob(file_up.filename)
@@ -56,6 +56,7 @@ class Backend:
                 #Otherwise, it will continue.
                 return "Exists"
             else:
+                #In the case
                 blob.upload_from_file(file_up)
                 with blob.open("r") as f:
                     content = f.readlines()
