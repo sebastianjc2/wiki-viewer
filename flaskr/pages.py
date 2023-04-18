@@ -190,6 +190,24 @@ def make_endpoints(app, backend):
                 return redirect(url_for('pages'))
         return render_template("upload.html", user=current_user)
 
+    @app.route('/reupload', methods=['GET', 'POST'])
+    @login_required
+    def reupload_file():
+        if request.method == 'POST':
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # If the user does not select a file, the browser submits an
+            # empty file without a filename.
+            if file and allowed_file(file.filename):
+                upload_outcome = backend.upload(file, current_user.get_id())
+                if upload_outcome == "Exists":
+                    return "Only the original author can reupload their pages."
+                return redirect(url_for('pages'))
+        return render_template("reupload.html", user=current_user)
+
     @app.route("/user", methods=["POST", "GET"])
     @login_required
     def user():

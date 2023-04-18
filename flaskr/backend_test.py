@@ -85,7 +85,6 @@ def test_get_wiki_page():
     ]
 
 
-#!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case a file by the same name already exists
 def test_upload_preexisting_fail():
     #Mocking the storage, backend, bucket, and blob
@@ -96,6 +95,7 @@ def test_upload_preexisting_fail():
     #Setting the return value for blob.exists to True since this is testing
     #if a file already exists by the same name
     test_blob.exists.return_value = True
+    #Sets the mock value for what is returned when it is opened so that it can check the author
     test_blob.open = mock_open(
         '{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}'
     )
@@ -106,11 +106,10 @@ def test_upload_preexisting_fail():
     file.readlines.return_value = "Test page :D\nTest page line 2!"
 
     #Asserting that it returns 'Exists' which is what it should return if
-    #it correctly realized there was a preexisting file by the same name
+    #it correctly found a prexisting file that was not authored by the current user.
     assert mocker.upload(file, "not_the_author") == "Exists"
 
 
-#!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case a file by the same name already exists
 def test_upload_preexisting_pass():
     #Mocking the storage, backend, bucket, and blob
@@ -121,6 +120,7 @@ def test_upload_preexisting_pass():
     #Setting the return value for blob.exists to True since this is testing
     #if a file already exists by the same name
     test_blob.exists.return_value = True
+    #Sets the mock value for what is returned when it is opened so that it can check the author
     test_blob.open = mock_open(
         '{"content" : ["Test page :D", "Test page line 2!"], "author" : "mock_user"}'
     )
@@ -130,12 +130,11 @@ def test_upload_preexisting_pass():
     file.filename.return_value("test.txt")
     file.readlines.return_value = "Test page :D\nTest page line 2!"
 
-    #Asserting that it returns 'Exists' which is what it should return if
-    #it correctly realized there was a preexisting file by the same name
+    #Asserting that it returns passed which is what it should return if
+    #it correctly recognized that the user matches the author of the prexisting file
     assert mocker.upload(file, "mock_user") == "Passed"
 
 
-#!!!RECOMMENT THIS CODE WAS CHANGED!!!
 #Tests the upload method in the case it uploads without error
 def test_upload_pass():
     #Mocking the storage, bucket
