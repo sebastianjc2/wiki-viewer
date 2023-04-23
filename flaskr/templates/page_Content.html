@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Team Bard's Wiki Viewer{% endblock %}
 
+{% block css_modifications %}
+<link rel='stylesheet' href= "/static/content.css" />
+{% endblock %}
+
 {% block content %}
     <h1>{{page_name}}</h1>
     {% for line in content %}

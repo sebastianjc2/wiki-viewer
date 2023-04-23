@@ -1,7 +1,22 @@
-body {
-    background-color: rgb(240,240,240);
-    font-family: courier;
+body{
+    color: rgb(252, 0, 176);
+    background-color: rgb(4, 37, 56);
+    font-family: impact;
 }
+
+
+#header{
+    height: 50px;
+    color: rgb(0, 238, 255);
+    background-color: rgb(252, 0, 176);
+    font-family: impact;
+    text-align: center;
+}
+
+#header-text{
+    color: rgb(0, 238, 255);
+}
+
 
 .radical {
     margin-top: 5px;
